@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import ForgotPassword from './components/auth/ForgotPassword';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Dashboard from './components/dashboard/Dashboard';
@@ -44,10 +49,21 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <AppProvider>
+    <AuthProvider>
       <BrowserRouter>
-        <AppLayout />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <AppProvider>
+                <AppLayout />
+              </AppProvider>
+            </ProtectedRoute>
+          } />
+        </Routes>
       </BrowserRouter>
-    </AppProvider>
+    </AuthProvider>
   );
 }
