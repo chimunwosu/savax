@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Coins, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getRandomWisdom } from '../../data/babylonWisdom';
 import './Auth.css';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // If already logged in, redirect to dashboard
+  if (user) return <Navigate to="/" replace />;
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -22,7 +26,11 @@ export default function Login() {
     setLoading(true);
     setTimeout(() => {
       const result = login({ email: form.email, password: form.password });
-      if (!result.success) setError(result.error);
+      if (!result.success) {
+        setError(result.error);
+      } else {
+        navigate('/', { replace: true });
+      }
       setLoading(false);
     }, 500);
   }
