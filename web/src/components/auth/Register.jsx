@@ -25,7 +25,7 @@ export default function Register() {
   // If already logged in, redirect to dashboard
   if (user) return <Navigate to="/" replace />;
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     if (!form.name || !form.email || !form.password || !form.confirmPassword) {
@@ -41,15 +41,17 @@ export default function Register() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const result = register({ name: form.name, email: form.email, password: form.password });
+    try {
+      const result = await register({ name: form.name, email: form.email, password: form.password });
       if (!result.success) {
         setError(result.error);
       } else {
         navigate('/', { replace: true });
       }
-      setLoading(false);
-    }, 500);
+    } catch {
+      setError('An error occurred. Please try again.');
+    }
+    setLoading(false);
   }
 
   return (

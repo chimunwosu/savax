@@ -1,13 +1,15 @@
 import { useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { SEVEN_LAWS, getRandomWisdom } from '../../data/babylonWisdom';
-import { formatCurrency, sumByField, getCurrentMonth } from '../../utils/helpers';
-import { BookOpen, Star, CheckCircle, AlertCircle, Lightbulb, Award, Shield, TrendingUp, PiggyBank, GraduationCap, Home, Landmark, Target } from 'lucide-react';
+import { sumByField } from '../../utils/helpers';
+import { BookOpen, Star, CheckCircle, AlertCircle, Lightbulb, Award, Shield, TrendingUp, PiggyBank, GraduationCap, Home, Landmark } from 'lucide-react';
 
 const ICONS = { PiggyBank, Receipt: Shield, TrendingUp, Shield, Home, Landmark, GraduationCap };
 
 export default function Advisor() {
   const { state } = useApp();
+  const { formatAmount } = useCurrency();
 
   const analysis = useMemo(() => {
     const totalIncome = sumByField(state.incomes, 'amount');
@@ -24,11 +26,11 @@ export default function Advisor() {
 
     // Health score
     let score = 0;
-    score += Math.min(25, savingsRate * 2.5); // savings
-    score += budgetOk ? 25 : Math.min(25, (1 - (totalExpenses / Math.max(totalIncome * 0.7, 1))) * 25); // budget
-    score += Math.min(20, investmentRate); // investing
-    score += totalDebt === 0 ? 15 : Math.max(0, 15 - (totalDebt / Math.max(totalIncome, 1)) * 15); // debt
-    score += Math.min(15, goalProgress * 0.15); // goals
+    score += Math.min(25, savingsRate * 2.5);
+    score += budgetOk ? 25 : Math.min(25, (1 - (totalExpenses / Math.max(totalIncome * 0.7, 1))) * 25);
+    score += Math.min(20, investmentRate);
+    score += totalDebt === 0 ? 15 : Math.max(0, 15 - (totalDebt / Math.max(totalIncome, 1)) * 15);
+    score += Math.min(15, goalProgress * 0.15);
     score = Math.round(Math.max(0, Math.min(100, score)));
 
     const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F';
@@ -39,7 +41,7 @@ export default function Advisor() {
     if (totalIncome === 0) actions.push({ text: 'Start by recording your income sources', icon: 'income' });
     if (savingsRate < 10 && totalIncome > 0) actions.push({ text: `Increase savings to at least 10% (currently ${savingsRate.toFixed(1)}%)`, icon: 'savings' });
     if (totalInvested === 0 && totalIncome > 0) actions.push({ text: 'Begin investing to make your gold multiply', icon: 'invest' });
-    if (totalDebt > 0) actions.push({ text: `Focus on eliminating ${formatCurrency(totalDebt)} in debt`, icon: 'debt' });
+    if (totalDebt > 0) actions.push({ text: `Focus on eliminating ${formatAmount(totalDebt)} in debt`, icon: 'debt' });
     if (goalsCount === 0) actions.push({ text: 'Set a savings goal to stay motivated', icon: 'goal' });
     if (!budgetOk && totalIncome > 0) actions.push({ text: 'Reduce expenses to stay within 70% of income', icon: 'budget' });
     if (actions.length === 0) actions.push({ text: 'Keep up the excellent work! You follow the laws of Babylon well.', icon: 'success' });
@@ -50,7 +52,7 @@ export default function Advisor() {
       let status = '';
       if (i === 0) { progress = Math.min(100, savingsRate * 10); status = savingsRate >= 10 ? 'Well done! You save at least 10%.' : `Save more - currently at ${savingsRate.toFixed(1)}%.`; }
       else if (i === 1) { progress = budgetOk ? 100 : Math.min(99, (totalIncome * 0.7 / Math.max(totalExpenses, 1)) * 100); status = budgetOk ? 'Expenses are within budget.' : 'Spending exceeds 70% of income.'; }
-      else if (i === 2) { progress = Math.min(100, investmentRate * 5); status = totalInvested > 0 ? `${formatCurrency(totalInvested)} invested.` : 'Start investing your savings.'; }
+      else if (i === 2) { progress = Math.min(100, investmentRate * 5); status = totalInvested > 0 ? `${formatAmount(totalInvested)} invested.` : 'Start investing your savings.'; }
       else if (i === 3) { progress = totalDebt === 0 ? 100 : Math.max(0, 50); status = totalDebt === 0 ? 'No risky debts. Well guarded!' : 'Work on reducing debt exposure.'; }
       else if (i === 4) { const hasAssets = state.assets.some(a => a.type === 'asset') || state.investments.length > 0; progress = hasAssets ? 75 : 0; status = hasAssets ? 'You own productive assets.' : 'Consider acquiring assets.'; }
       else if (i === 5) { const hasRetirement = state.goals.some(g => g.category === 'retirement'); progress = hasRetirement ? 75 : 0; status = hasRetirement ? 'Retirement planning in progress.' : 'Plan for your future income.'; }
@@ -59,7 +61,7 @@ export default function Advisor() {
     });
 
     return { score, grade, gradeColor, actions, lawData, savingsRate, totalIncome, totalExpenses, totalInvested, totalDebt };
-  }, [state]);
+  }, [state, formatAmount]);
 
   const wisdom = useMemo(() => getRandomWisdom(), []);
 

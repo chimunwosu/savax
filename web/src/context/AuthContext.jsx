@@ -1,159 +1,134 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 const AuthContext = createContext();
-
-const AUTH_STORAGE_KEY = 'savax_auth';
-const USERS_STORAGE_KEY = 'savax_users';
-
-function getStoredUsers() {
-  try {
-    const data = localStorage.getItem(USERS_STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-}
-
-function getStoredAuth() {
-  try {
-    const data = localStorage.getItem(AUTH_STORAGE_KEY);
-    return data ? JSON.parse(data) : null;
-  } catch {
-    return null;
-  }
-}
-
-function hashPassword(password) {
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return 'h_' + Math.abs(hash).toString(36) + '_' + password.length;
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = getStoredAuth();
-    if (stored) {
-      const users = getStoredUsers();
-      const found = users.find(u => u.id === stored.id);
-      if (found) {
-        setUser({ id: found.id, name: found.name, email: found.email, avatar: found.avatar });
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || '',
+          email: firebaseUser.email,
+          avatar: (firebaseUser.displayName || firebaseUser.email || 'S').charAt(0).toUpperCase(),
+        });
       } else {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  function register({ name, email, password }) {
-    const users = getStoredUsers();
-    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-      return { success: false, error: 'An account with this email already exists.' };
+  async function register({ name, email, password }) {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      setUser({
+        id: cred.user.uid,
+        name,
+        email: cred.user.email,
+        avatar: name.charAt(0).toUpperCase(),
+      });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: getAuthErrorMessage(err.code) };
     }
-    const newUser = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      name,
-      email: email.toLowerCase(),
-      password: hashPassword(password),
-      avatar: name.charAt(0).toUpperCase(),
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
-    saveUsers(users);
-    const session = { id: newUser.id, name: newUser.name, email: newUser.email, avatar: newUser.avatar };
-    setUser(session);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-    return { success: true };
   }
 
-  function login({ email, password }) {
-    const users = getStoredUsers();
-    const found = users.find(u => u.email === email.toLowerCase());
-    if (!found) {
-      return { success: false, error: 'No account found with this email.' };
+  async function login({ email, password }) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: getAuthErrorMessage(err.code) };
     }
-    if (found.password !== hashPassword(password)) {
-      return { success: false, error: 'Incorrect password. Please try again.' };
-    }
-    const session = { id: found.id, name: found.name, email: found.email, avatar: found.avatar };
-    setUser(session);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-    return { success: true };
   }
 
-  function logout() {
+  async function logout() {
+    await signOut(auth);
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
   }
 
-  function updateProfile(updates) {
-    const users = getStoredUsers();
-    const idx = users.findIndex(u => u.id === user.id);
-    if (idx === -1) return { success: false, error: 'User not found.' };
-    users[idx] = { ...users[idx], ...updates, avatar: updates.name ? updates.name.charAt(0).toUpperCase() : users[idx].avatar };
-    saveUsers(users);
-    const session = { id: users[idx].id, name: users[idx].name, email: users[idx].email, avatar: users[idx].avatar };
-    setUser(session);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-    return { success: true };
-  }
-
-  function changePassword(currentPassword, newPassword) {
-    const users = getStoredUsers();
-    const idx = users.findIndex(u => u.id === user.id);
-    if (idx === -1) return { success: false, error: 'User not found.' };
-    if (users[idx].password !== hashPassword(currentPassword)) {
-      return { success: false, error: 'Current password is incorrect.' };
+  async function updateUserProfile(updates) {
+    try {
+      if (updates.name) {
+        await updateProfile(auth.currentUser, { displayName: updates.name });
+      }
+      setUser(prev => ({
+        ...prev,
+        name: updates.name || prev.name,
+        avatar: updates.name ? updates.name.charAt(0).toUpperCase() : prev.avatar,
+      }));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
     }
-    users[idx].password = hashPassword(newPassword);
-    saveUsers(users);
-    return { success: true };
   }
 
-  function resetPassword(email) {
-    const users = getStoredUsers();
-    const found = users.find(u => u.email === email.toLowerCase());
-    if (!found) {
-      return { success: false, error: 'No account found with this email.' };
+  async function changePassword(currentPassword, newPassword) {
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: getAuthErrorMessage(err.code) };
     }
-    // In a real app this would send an email. Here we generate a reset code.
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const idx = users.findIndex(u => u.id === found.id);
-    users[idx].resetCode = code;
-    users[idx].resetExpiry = Date.now() + 15 * 60 * 1000; // 15 mins
-    saveUsers(users);
-    return { success: true, code }; // code shown to user in demo mode
   }
 
-  function confirmReset(email, code, newPassword) {
-    const users = getStoredUsers();
-    const idx = users.findIndex(u => u.email === email.toLowerCase());
-    if (idx === -1) return { success: false, error: 'No account found.' };
-    if (users[idx].resetCode !== code || Date.now() > users[idx].resetExpiry) {
-      return { success: false, error: 'Invalid or expired reset code.' };
+  async function resetPassword(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: getAuthErrorMessage(err.code) };
     }
-    users[idx].password = hashPassword(newPassword);
-    delete users[idx].resetCode;
-    delete users[idx].resetExpiry;
-    saveUsers(users);
-    return { success: true };
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, changePassword, resetPassword, confirmReset }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      updateProfile: updateUserProfile,
+      changePassword,
+      resetPassword,
+    }}>
       {children}
     </AuthContext.Provider>
   );
+}
+
+function getAuthErrorMessage(code) {
+  switch (code) {
+    case 'auth/email-already-in-use': return 'An account with this email already exists.';
+    case 'auth/invalid-email': return 'Invalid email address.';
+    case 'auth/weak-password': return 'Password should be at least 6 characters.';
+    case 'auth/user-not-found': return 'No account found with this email.';
+    case 'auth/wrong-password': return 'Incorrect password. Please try again.';
+    case 'auth/invalid-credential': return 'Invalid email or password. Please try again.';
+    case 'auth/too-many-requests': return 'Too many attempts. Please try again later.';
+    case 'auth/user-disabled': return 'This account has been disabled.';
+    default: return 'An error occurred. Please try again.';
+  }
 }
 
 export function useAuth() {

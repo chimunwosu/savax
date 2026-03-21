@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -58,7 +59,9 @@ export default function App() {
           <Route path="/*" element={
             <ProtectedRoute>
               <AppProvider>
-                <AppLayout />
+                <CurrencyProvider>
+                  <AppLayout />
+                </CurrencyProvider>
               </AppProvider>
             </ProtectedRoute>
           } />

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, sumByField } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
+import { sumByField } from '../../utils/helpers';
 import { Plus, Scale, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -9,6 +10,7 @@ const emptyForm = { name: '', amount: '', type: 'asset', category: 'cash' };
 
 export default function NetWorth() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -61,16 +63,16 @@ export default function NetWorth() {
         <Scale size={36} color="#D4AF37" />
         <div style={{ fontSize: '0.85rem', color: '#D4AF37', marginTop: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Net Worth</div>
         <div style={{ fontSize: '2.5rem', fontWeight: 700, fontFamily: "'Playfair Display', serif", color: netWorth >= 0 ? '#D4AF37' : '#e63946', margin: '8px 0' }}>
-          {formatCurrency(netWorth)}
+          {formatAmount(netWorth)}
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 12 }}>
           <div>
             <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>Assets</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#2d6a4f' }}>{formatCurrency(totalAssets)}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#2d6a4f' }}>{formatAmount(totalAssets)}</div>
           </div>
           <div>
             <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>Liabilities</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e63946' }}>{formatCurrency(totalLiabilities)}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e63946' }}>{formatAmount(totalLiabilities)}</div>
           </div>
         </div>
       </div>
@@ -86,14 +88,14 @@ export default function NetWorth() {
             <div key={i} className="flex justify-between items-center" style={{ padding: '10px 0', borderBottom: '1px solid var(--gray-100)' }}>
               <span className="text-sm">{item.name}</span>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-green">{formatCurrency(item.amount)}</span>
+                <span className="font-bold text-green">{formatAmount(item.amount)}</span>
                 {item.id && <button className="btn-icon" onClick={() => dispatch({ type: 'DELETE_ASSET', payload: item.id })}><Trash2 size={13} /></button>}
               </div>
             </div>
           )) : <p className="text-sm text-gray">No assets yet</p>}
           <div className="flex justify-between items-center mt-3" style={{ paddingTop: 8 }}>
             <span className="font-medium">Total</span>
-            <span className="font-bold text-green" style={{ fontSize: '1.1rem' }}>{formatCurrency(totalAssets)}</span>
+            <span className="font-bold text-green" style={{ fontSize: '1.1rem' }}>{formatAmount(totalAssets)}</span>
           </div>
         </div>
 
@@ -107,14 +109,14 @@ export default function NetWorth() {
             <div key={i} className="flex justify-between items-center" style={{ padding: '10px 0', borderBottom: '1px solid var(--gray-100)' }}>
               <span className="text-sm">{item.name}</span>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-red">{formatCurrency(item.amount)}</span>
+                <span className="font-bold text-red">{formatAmount(item.amount)}</span>
                 {item.id && <button className="btn-icon" onClick={() => dispatch({ type: 'DELETE_ASSET', payload: item.id })}><Trash2 size={13} /></button>}
               </div>
             </div>
           )) : <p className="text-sm text-gray">No liabilities - well done!</p>}
           <div className="flex justify-between items-center mt-3" style={{ paddingTop: 8 }}>
             <span className="font-medium">Total</span>
-            <span className="font-bold text-red" style={{ fontSize: '1.1rem' }}>{formatCurrency(totalLiabilities)}</span>
+            <span className="font-bold text-red" style={{ fontSize: '1.1rem' }}>{formatAmount(totalLiabilities)}</span>
           </div>
         </div>
       </div>
@@ -126,8 +128,8 @@ export default function NetWorth() {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
             <XAxis dataKey="name" />
-            <YAxis tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v) => formatCurrency(v)} />
+            <YAxis tickFormatter={v => formatAmount(v)} />
+            <Tooltip formatter={(v) => formatAmount(v)} />
             <Bar dataKey="value" radius={[8, 8, 0, 0]}>
               <Cell fill="#2d6a4f" />
               <Cell fill="#e63946" />

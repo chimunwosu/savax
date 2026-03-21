@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, getMonthRange, groupByMonth, sumByField } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
+import { getMonthRange, groupByMonth, sumByField } from '../../utils/helpers';
 import { SEVEN_LAWS, getContextualWisdom } from '../../data/babylonWisdom';
-import { Wallet, TrendingDown, TrendingUp, PiggyBank, BookOpen } from 'lucide-react';
+import { Wallet, TrendingDown, TrendingUp, PiggyBank, BookOpen, Loader } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#457b9d','#f4a261','#2d6a4f','#e63946','#6c5ce7','#00b4d8','#D4AF37','#343a40','#ff6b6b','#e9c46a','#6c757d','#a8dadc'];
 
 export default function Dashboard() {
-  const { state } = useApp();
+  const { state, dataLoading } = useApp();
+  const { formatAmount } = useCurrency();
 
   const stats = useMemo(() => {
     const totalIncome = sumByField(state.incomes, 'amount');
@@ -72,6 +74,15 @@ export default function Dashboard() {
     return all.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
   }, [state.incomes, state.expenses]);
 
+  if (dataLoading) {
+    return (
+      <div className="empty-state" style={{ marginTop: 100 }}>
+        <Loader size={36} className="spin" color="var(--gold)" />
+        <h3>Loading your treasury...</h3>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="page-header">
@@ -112,7 +123,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <div className="stat-label">{s.label}</div>
-                <div className="stat-value" style={{ fontSize: '1.25rem' }}>{formatCurrency(s.value)}</div>
+                <div className="stat-value" style={{ fontSize: '1.25rem' }}>{formatAmount(s.value)}</div>
               </div>
             </div>
           </div>
@@ -129,7 +140,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v) => formatCurrency(v)} />
+                <Tooltip formatter={(v) => formatAmount(v)} />
                 <Area type="monotone" dataKey="income" stackId="1" stroke="#D4AF37" fill="rgba(212,175,55,0.3)" />
                 <Area type="monotone" dataKey="expenses" stackId="2" stroke="#e63946" fill="rgba(230,57,70,0.2)" />
               </AreaChart>
@@ -150,7 +161,7 @@ export default function Dashboard() {
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v) => formatCurrency(v)} />
+                <Tooltip formatter={(v) => formatAmount(v)} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -190,7 +201,7 @@ export default function Dashboard() {
                     <div className="text-xs text-gray">{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
                   <span className={`font-bold ${tx.txType === 'income' ? 'text-green' : 'text-red'}`}>
-                    {tx.txType === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                    {tx.txType === 'income' ? '+' : '-'}{formatAmount(tx.amount)}
                   </span>
                 </div>
               ))}

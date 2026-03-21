@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, getMonthRange, groupByMonth, sumByField, formatMonth } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
+import { getMonthRange, groupByMonth, sumByField } from '../../utils/helpers';
 import { EXPENSE_CATEGORIES } from '../../data/babylonWisdom';
-import { BarChart3, TrendingUp, TrendingDown, Award } from 'lucide-react';
+import { TrendingUp, TrendingDown, Award } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const COLORS = ['#457b9d','#f4a261','#2d6a4f','#e63946','#6c5ce7','#00b4d8','#D4AF37','#343a40','#ff6b6b','#e9c46a'];
 
 export default function Reports() {
   const { state } = useApp();
+  const { formatAmount } = useCurrency();
   const [period, setPeriod] = useState(6);
 
   const { monthlyData, categoryData, insights } = useMemo(() => {
@@ -74,8 +76,8 @@ export default function Reports() {
           <BarChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
             <XAxis dataKey="month" />
-            <YAxis tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v) => formatCurrency(v)} />
+            <YAxis tickFormatter={v => formatAmount(v)} />
+            <Tooltip formatter={(v) => formatAmount(v)} />
             <Legend />
             <Bar dataKey="income" name="Income" fill="#D4AF37" radius={[4, 4, 0, 0]} />
             <Bar dataKey="expenses" name="Expenses" fill="#e63946" radius={[4, 4, 0, 0]} />
@@ -107,7 +109,7 @@ export default function Reports() {
                 <Pie data={categoryData} cx="50%" cy="50%" outerRadius={85} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                   {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip formatter={(v) => formatCurrency(v)} />
+                <Tooltip formatter={(v) => formatAmount(v)} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -163,9 +165,9 @@ export default function Reports() {
               {monthlyData.map(m => (
                 <tr key={m.month}>
                   <td className="font-medium">{m.month}</td>
-                  <td className="text-green">{formatCurrency(m.income)}</td>
-                  <td className="text-red">{formatCurrency(m.expenses)}</td>
-                  <td className={m.savings >= 0 ? 'text-green' : 'text-red'}>{formatCurrency(m.savings)}</td>
+                  <td className="text-green">{formatAmount(m.income)}</td>
+                  <td className="text-red">{formatAmount(m.expenses)}</td>
+                  <td className={m.savings >= 0 ? 'text-green' : 'text-red'}>{formatAmount(m.savings)}</td>
                   <td><span className={`badge ${m.savingsRate >= 10 ? 'badge-green' : m.savingsRate >= 0 ? 'badge-gold' : 'badge-red'}`}>{m.savingsRate}%</span></td>
                 </tr>
               ))}

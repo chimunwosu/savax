@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate, getCurrentMonth, sumByField } from '../../utils/helpers';
-import { Plus, Edit2, Trash2, Wallet, DollarSign } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
+import { formatDate, getCurrentMonth, sumByField } from '../../utils/helpers';
+import { Plus, Edit2, Trash2, Wallet } from 'lucide-react';
 
 const INCOME_TYPES = ['Salary', 'Freelance', 'Business', 'Passive', 'Other'];
 
@@ -9,6 +10,7 @@ const emptyForm = { amount: '', source: '', date: new Date().toISOString().split
 
 export default function Income() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -53,15 +55,15 @@ export default function Income() {
       <div className="grid grid-3" style={{ marginBottom: 24 }}>
         <div className="card">
           <div className="stat-label">Total Income</div>
-          <div className="stat-value">{formatCurrency(totalIncome)}</div>
+          <div className="stat-value">{formatAmount(totalIncome)}</div>
         </div>
         <div className="card">
           <div className="stat-label">This Month</div>
-          <div className="stat-value">{formatCurrency(monthlyIncome)}</div>
+          <div className="stat-value">{formatAmount(monthlyIncome)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Monthly Average</div>
-          <div className="stat-value">{formatCurrency(avgMonthly)}</div>
+          <div className="stat-value">{formatAmount(avgMonthly)}</div>
         </div>
       </div>
 
@@ -77,7 +79,7 @@ export default function Income() {
             <div key={s.label} style={{ flex: 1, minWidth: 120, textAlign: 'center', padding: 12, borderRadius: 'var(--radius-sm)', background: 'var(--cream)' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: s.color }}>{s.pct}%</div>
               <div className="text-sm font-medium">{s.label}</div>
-              <div className="text-xs text-gray">{formatCurrency(s.amount)}/mo</div>
+              <div className="text-xs text-gray">{formatAmount(s.amount)}/mo</div>
             </div>
           ))}
         </div>
@@ -102,7 +104,7 @@ export default function Income() {
                     <td>{formatDate(item.date)}</td>
                     <td className="font-medium">{item.source}</td>
                     <td><span className="badge badge-gold">{item.type}</span></td>
-                    <td className="font-bold text-green">{formatCurrency(item.amount)}</td>
+                    <td className="font-bold text-green">{formatAmount(item.amount)}</td>
                     <td>
                       <div className="flex gap-2">
                         <button className="btn-icon" onClick={() => openEdit(item)}><Edit2 size={15} /></button>

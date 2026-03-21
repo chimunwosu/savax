@@ -1,13 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { EXPENSE_CATEGORIES } from '../../data/babylonWisdom';
-import { formatCurrency, formatDate, getCurrentMonth, sumByField } from '../../utils/helpers';
+import { formatDate, getCurrentMonth, sumByField } from '../../utils/helpers';
 import { Plus, Edit2, Trash2, Receipt, Filter, AlertTriangle } from 'lucide-react';
 
 const emptyForm = { amount: '', description: '', category: 'food', date: new Date().toISOString().split('T')[0], notes: '' };
 
 export default function Expenses() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -16,7 +18,6 @@ export default function Expenses() {
   const currentMonth = getCurrentMonth();
   const totalExpenses = sumByField(state.expenses, 'amount');
   const monthlyExpenses = sumByField(state.expenses.filter(e => e.date?.startsWith(currentMonth)), 'amount');
-  const totalIncome = sumByField(state.incomes, 'amount');
   const monthlyIncome = sumByField(state.incomes.filter(i => i.date?.startsWith(currentMonth)), 'amount');
   const budget = monthlyIncome * (state.settings.livingRate / 100);
   const budgetUsed = budget > 0 ? (monthlyExpenses / budget) * 100 : 0;
@@ -55,11 +56,11 @@ export default function Expenses() {
       <div className="grid grid-3" style={{ marginBottom: 24 }}>
         <div className="card">
           <div className="stat-label">Total Expenses</div>
-          <div className="stat-value">{formatCurrency(totalExpenses)}</div>
+          <div className="stat-value">{formatAmount(totalExpenses)}</div>
         </div>
         <div className="card">
           <div className="stat-label">This Month</div>
-          <div className="stat-value">{formatCurrency(monthlyExpenses)}</div>
+          <div className="stat-value">{formatAmount(monthlyExpenses)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Budget Status</div>
@@ -71,14 +72,14 @@ export default function Expenses() {
       <div className="card" style={{ marginBottom: 24 }}>
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium">Monthly Budget ({state.settings.livingRate}% of income)</span>
-          <span className="text-sm">{formatCurrency(monthlyExpenses)} / {formatCurrency(budget)}</span>
+          <span className="text-sm">{formatAmount(monthlyExpenses)} / {formatAmount(budget)}</span>
         </div>
         <div className="progress-bar" style={{ height: 12 }}>
           <div className={`progress-fill ${overBudget ? '' : 'progress-green'}`} style={{ width: `${Math.min(budgetUsed, 100)}%`, background: overBudget ? 'var(--red)' : undefined }} />
         </div>
         {overBudget && (
           <div className="flex items-center gap-2 mt-2" style={{ color: 'var(--red)', fontSize: '0.85rem' }}>
-            <AlertTriangle size={14} /> Over budget by {formatCurrency(monthlyExpenses - budget)}
+            <AlertTriangle size={14} /> Over budget by {formatAmount(monthlyExpenses - budget)}
           </div>
         )}
       </div>
@@ -107,7 +108,7 @@ export default function Expenses() {
                     <td>{formatDate(item.date)}</td>
                     <td className="font-medium">{item.description}</td>
                     <td><span className="badge" style={{ background: getCatColor(item.category) + '22', color: getCatColor(item.category) }}>{getCatName(item.category)}</span></td>
-                    <td className="font-bold text-red">{formatCurrency(item.amount)}</td>
+                    <td className="font-bold text-red">{formatAmount(item.amount)}</td>
                     <td>
                       <div className="flex gap-2">
                         <button className="btn-icon" onClick={() => openEdit(item)}><Edit2 size={15} /></button>

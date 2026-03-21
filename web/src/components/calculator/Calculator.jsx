@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import { formatCurrency } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Calculator as CalcIcon, DollarSign, Percent, Clock } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function Calculator() {
+  const { formatAmount } = useCurrency();
   const [principal, setPrincipal] = useState(1000);
   const [monthly, setMonthly] = useState(200);
   const [rate, setRate] = useState(7);
@@ -73,15 +74,15 @@ export default function Calculator() {
           <div className="grid" style={{ gap: 16 }}>
             <div className="card" style={{ borderLeft: '4px solid var(--gold)' }}>
               <div className="stat-label">Future Value</div>
-              <div className="stat-value" style={{ color: 'var(--gold-dark)', fontSize: '1.75rem' }}>{formatCurrency(futureValue)}</div>
+              <div className="stat-value" style={{ color: 'var(--gold-dark)', fontSize: '1.75rem' }}>{formatAmount(futureValue)}</div>
             </div>
             <div className="card" style={{ borderLeft: '4px solid var(--blue)' }}>
               <div className="stat-label">Total Contributions</div>
-              <div className="stat-value">{formatCurrency(totalContributions)}</div>
+              <div className="stat-value">{formatAmount(totalContributions)}</div>
             </div>
             <div className="card" style={{ borderLeft: '4px solid var(--emerald)' }}>
               <div className="stat-label">Interest Earned</div>
-              <div className="stat-value text-green">{formatCurrency(totalInterest)}</div>
+              <div className="stat-value text-green">{formatAmount(totalInterest)}</div>
             </div>
           </div>
 
@@ -92,8 +93,8 @@ export default function Calculator() {
               <span className="font-medium text-sm" style={{ color: 'var(--gold-dark)' }}>Babylon Insight</span>
             </div>
             <p className="text-sm" style={{ color: 'var(--gray-600)', lineHeight: 1.6 }}>
-              At {rate}% annual return, your {formatCurrency(monthly)}/month grows to {formatCurrency(futureValue)} in {years} years.
-              That's {formatCurrency(totalInterest)} earned from compound growth alone.
+              At {rate}% annual return, your {formatAmount(monthly)}/month grows to {formatAmount(futureValue)} in {years} years.
+              That's {formatAmount(totalInterest)} earned from compound growth alone.
               As the ancient Babylonians knew: gold that labors multiplies itself.
             </p>
           </div>
@@ -107,8 +108,8 @@ export default function Calculator() {
           <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
             <XAxis dataKey="year" label={{ value: 'Years', position: 'insideBottom', offset: -5 }} />
-            <YAxis tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v) => formatCurrency(v)} />
+            <YAxis tickFormatter={v => formatAmount(v)} />
+            <Tooltip formatter={(v) => formatAmount(v)} />
             <Legend />
             <Area type="monotone" dataKey="contributions" name="Contributions" stackId="1" stroke="#457b9d" fill="rgba(69,123,157,0.4)" />
             <Area type="monotone" dataKey="interest" name="Interest" stackId="1" stroke="#2d6a4f" fill="rgba(45,106,79,0.4)" />

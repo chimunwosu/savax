@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { CURRENCIES } from '../../config/currencies';
 import { User, Percent, Download, Upload, Trash2, Info } from 'lucide-react';
-
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'NGN', 'CAD', 'AUD', 'JPY'];
 
 export default function Settings() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showClear, setShowClear] = useState(false);
   const s = state.settings;
 
@@ -48,8 +49,8 @@ export default function Settings() {
   }
 
   function handleClear() {
-    localStorage.removeItem('savax_data');
-    window.location.reload();
+    dispatch({ type: 'IMPORT_DATA', payload: {} });
+    setShowClear(false);
   }
 
   return (
@@ -71,9 +72,16 @@ export default function Settings() {
         </div>
         <div className="form-group">
           <label>Currency</label>
-          <select className="form-control" value={s.currency} onChange={e => updateSetting('currency', e.target.value)} style={{ maxWidth: 200 }}>
-            {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+          <select className="form-control" value={s.currency} onChange={e => updateSetting('currency', e.target.value)} style={{ maxWidth: 300 }}>
+            {CURRENCIES.map(c => (
+              <option key={c.code} value={c.code}>
+                {c.flag} {c.code} — {c.symbol} {c.name}
+              </option>
+            ))}
           </select>
+          <div className="text-sm text-gray mt-2">
+            Preview: {formatAmount(12345.67)}
+          </div>
         </div>
       </div>
 
@@ -140,8 +148,8 @@ export default function Settings() {
           <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>About Savax</h3>
         </div>
         <p className="text-sm text-gray">
-          Savax v1.0 — Built on the timeless wealth-building wisdom of The Richest Man in Babylon.
-          Your financial data is stored locally on your device and never sent to any server.
+          Savax v2.0 — Built on the timeless wealth-building wisdom of The Richest Man in Babylon.
+          Your data is securely stored in the cloud and syncs across all your devices.
         </p>
       </div>
 

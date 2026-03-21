@@ -16,7 +16,7 @@ export default function Login() {
   // If already logged in, redirect to dashboard
   if (user) return <Navigate to="/" replace />;
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     if (!form.email || !form.password) {
@@ -24,15 +24,17 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const result = login({ email: form.email, password: form.password });
+    try {
+      const result = await login({ email: form.email, password: form.password });
       if (!result.success) {
         setError(result.error);
       } else {
         navigate('/', { replace: true });
       }
-      setLoading(false);
-    }, 500);
+    } catch {
+      setError('An error occurred. Please try again.');
+    }
+    setLoading(false);
   }
 
   return (

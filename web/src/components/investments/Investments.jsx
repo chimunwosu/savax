@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { INVESTMENT_TYPES } from '../../data/babylonWisdom';
-import { formatCurrency, formatDate, sumByField } from '../../utils/helpers';
+import { formatDate, sumByField } from '../../utils/helpers';
 import { Plus, Edit2, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const emptyForm = { name: '', type: 'stocks', investedAmount: '', currentValue: '', date: new Date().toISOString().split('T')[0], notes: '' };
 
 export default function Investments() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -62,16 +64,16 @@ export default function Investments() {
       <div className="grid grid-3" style={{ marginBottom: 24 }}>
         <div className="card">
           <div className="stat-label">Total Invested</div>
-          <div className="stat-value">{formatCurrency(totalInvested)}</div>
+          <div className="stat-value">{formatAmount(totalInvested)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Current Value</div>
-          <div className="stat-value">{formatCurrency(totalCurrent)}</div>
+          <div className="stat-value">{formatAmount(totalCurrent)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Total Returns</div>
           <div className={`stat-value ${totalReturn >= 0 ? 'text-green' : 'text-red'}`}>
-            {totalReturn >= 0 ? '+' : ''}{formatCurrency(totalReturn)}
+            {totalReturn >= 0 ? '+' : ''}{formatAmount(totalReturn)}
           </div>
           <span className={`badge mt-2 ${returnPct >= 0 ? 'badge-green' : 'badge-red'}`}>
             {returnPct >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
@@ -91,7 +93,7 @@ export default function Investments() {
                     <Cell key={i} fill={INVESTMENT_TYPES[i % INVESTMENT_TYPES.length]?.color || '#6c757d'} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v) => formatCurrency(v)} />
+                <Tooltip formatter={(v) => formatAmount(v)} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -123,9 +125,9 @@ export default function Investments() {
                     <tr key={inv.id}>
                       <td className="font-medium">{inv.name}</td>
                       <td><span className="badge badge-blue">{INVESTMENT_TYPES.find(t => t.id === inv.type)?.name || inv.type}</span></td>
-                      <td>{formatCurrency(inv.investedAmount)}</td>
-                      <td className="font-bold">{formatCurrency(inv.currentValue)}</td>
-                      <td className={ret >= 0 ? 'text-green' : 'text-red'}>{ret >= 0 ? '+' : ''}{formatCurrency(ret)} ({pct.toFixed(1)}%)</td>
+                      <td>{formatAmount(inv.investedAmount)}</td>
+                      <td className="font-bold">{formatAmount(inv.currentValue)}</td>
+                      <td className={ret >= 0 ? 'text-green' : 'text-red'}>{ret >= 0 ? '+' : ''}{formatAmount(ret)} ({pct.toFixed(1)}%)</td>
                       <td>{formatDate(inv.date)}</td>
                       <td>
                         <div className="flex gap-2">

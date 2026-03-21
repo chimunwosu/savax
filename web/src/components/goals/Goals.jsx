@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
+import { formatDate } from '../../utils/helpers';
 import { Plus, Edit2, Trash2, Target, Calendar, Check, PlusCircle } from 'lucide-react';
 
 const GOAL_CATEGORIES = ['emergency', 'vacation', 'home', 'car', 'education', 'retirement', 'wedding', 'other'];
@@ -8,6 +9,7 @@ const emptyForm = { name: '', targetAmount: '', currentAmount: '', deadline: '',
 
 export default function Goals() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [showFundModal, setShowFundModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -47,8 +49,7 @@ export default function Goals() {
 
   function daysLeft(deadline) {
     if (!deadline) return null;
-    const diff = Math.ceil((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24));
-    return diff;
+    return Math.ceil((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24));
   }
 
   return (
@@ -94,15 +95,15 @@ export default function Goals() {
                 <div className="flex justify-between">
                   <div>
                     <div className="text-xs text-gray">Saved</div>
-                    <div className="font-bold text-green">{formatCurrency(goal.currentAmount)}</div>
+                    <div className="font-bold text-green">{formatAmount(goal.currentAmount)}</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div className="text-xs text-gray">Remaining</div>
-                    <div className="font-bold">{formatCurrency(Math.max(0, goal.targetAmount - goal.currentAmount))}</div>
+                    <div className="font-bold">{formatAmount(Math.max(0, goal.targetAmount - goal.currentAmount))}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div className="text-xs text-gray">Target</div>
-                    <div className="font-bold text-gold">{formatCurrency(goal.targetAmount)}</div>
+                    <div className="font-bold text-gold">{formatAmount(goal.targetAmount)}</div>
                   </div>
                 </div>
 
@@ -175,7 +176,7 @@ export default function Goals() {
         <div className="modal-overlay" onClick={() => setShowFundModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 380 }}>
             <h2>Add Funds to {fundGoal.name}</h2>
-            <p className="text-sm text-gray mb-3">Current: {formatCurrency(fundGoal.currentAmount)} / {formatCurrency(fundGoal.targetAmount)}</p>
+            <p className="text-sm text-gray mb-3">Current: {formatAmount(fundGoal.currentAmount)} / {formatAmount(fundGoal.targetAmount)}</p>
             <div className="form-group">
               <label>Amount to Add</label>
               <input type="number" className="form-control" placeholder="0.00" value={fundAmount} onChange={e => setFundAmount(e.target.value)} autoFocus />

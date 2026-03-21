@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, calcDebtPayoff } from '../../utils/helpers';
+import { useCurrency } from '../../context/CurrencyContext';
+import { calcDebtPayoff } from '../../utils/helpers';
 import { Plus, Edit2, Trash2, CreditCard, ArrowDown, ArrowUp } from 'lucide-react';
 
 const emptyForm = { name: '', balance: '', interestRate: '', minPayment: '', extraPayment: '0' };
 
 export default function DebtPayoff() {
   const { state, dispatch } = useApp();
+  const { formatAmount } = useCurrency();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -75,11 +77,11 @@ export default function DebtPayoff() {
       <div className="grid grid-3" style={{ marginBottom: 24 }}>
         <div className="card">
           <div className="stat-label">Total Debt</div>
-          <div className="stat-value text-red">{formatCurrency(totalDebt)}</div>
+          <div className="stat-value text-red">{formatAmount(totalDebt)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Monthly Payments</div>
-          <div className="stat-value">{formatCurrency(totalPayments)}</div>
+          <div className="stat-value">{formatAmount(totalPayments)}</div>
         </div>
         <div className="card">
           <div className="stat-label">Debt-Free In</div>
@@ -119,11 +121,11 @@ export default function DebtPayoff() {
                   return (
                     <tr key={debt.id}>
                       <td className="font-medium">{debt.name}</td>
-                      <td className="text-red font-bold">{formatCurrency(debt.balance)}</td>
+                      <td className="text-red font-bold">{formatAmount(debt.balance)}</td>
                       <td>{debt.interestRate}%</td>
-                      <td>{formatCurrency(Number(debt.minPayment) + Number(debt.extraPayment || 0))}</td>
+                      <td>{formatAmount(Number(debt.minPayment) + Number(debt.extraPayment || 0))}</td>
                       <td>{formatMonths(info.months)}</td>
-                      <td className="text-green">{info.interestSaved > 0 ? formatCurrency(info.interestSaved) : '-'}</td>
+                      <td className="text-green">{info.interestSaved > 0 ? formatAmount(info.interestSaved) : '-'}</td>
                       <td>
                         <div className="flex gap-2">
                           <button className="btn-icon" onClick={() => openEdit(debt)}><Edit2 size={15} /></button>
