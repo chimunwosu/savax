@@ -1,18 +1,11 @@
 import { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
-import {
-  collection,
-  doc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  getDoc,
-  writeBatch,
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { isFirebaseConfigured, db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 import { generateId } from '../utils/helpers';
 
 const AppContext = createContext();
+
+const STORAGE_KEY = 'savax_data';
 
 const defaultState = {
   incomes: [],
@@ -88,33 +81,52 @@ function reducer(state, action) {
   }
 }
 
+// ── Local Storage helpers ──
+function loadLocalState() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      return { ...defaultState, ...parsed, settings: { ...defaultState.settings, ...parsed.settings } };
+    }
+  } catch (e) {
+    console.error('Failed to load state:', e);
+  }
+  return defaultState;
+}
+
+function saveLocalState(state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error('Failed to save state:', e);
+  }
+}
+
+// ── Firestore helpers ──
 const COLLECTIONS = ['incomes', 'expenses', 'investments', 'goals', 'debts', 'assets'];
 
-async function loadUserData(uid) {
+async function loadFirestoreData(uid) {
+  const { collection, doc, getDocs, getDoc } = await import('firebase/firestore');
   const data = { ...defaultState };
 
-  // Load settings
   const settingsDoc = await getDoc(doc(db, 'users', uid, 'profile', 'settings'));
   if (settingsDoc.exists()) {
     data.settings = { ...defaultState.settings, ...settingsDoc.data() };
   }
 
-  // Load all collections in parallel
   const results = await Promise.all(
     COLLECTIONS.map(async (name) => {
       const snapshot = await getDocs(collection(db, 'users', uid, name));
       return { name, docs: snapshot.docs.map(d => ({ ...d.data(), id: d.id })) };
     })
   );
-
-  results.forEach(({ name, docs }) => {
-    data[name] = docs;
-  });
-
+  results.forEach(({ name, docs }) => { data[name] = docs; });
   return data;
 }
 
 async function syncToFirestore(uid, action, newState) {
+  const { doc, setDoc, deleteDoc, writeBatch } = await import('firebase/firestore');
   const { type, payload } = action;
 
   try {
@@ -122,9 +134,7 @@ async function syncToFirestore(uid, action, newState) {
       await setDoc(doc(db, 'users', uid, 'profile', 'settings'), newState.settings);
       return;
     }
-
     if (type === 'IMPORT_DATA') {
-      // Write all data
       const batch = writeBatch(db);
       batch.set(doc(db, 'users', uid, 'profile', 'settings'), newState.settings);
       for (const col of COLLECTIONS) {
@@ -135,10 +145,8 @@ async function syncToFirestore(uid, action, newState) {
       await batch.commit();
       return;
     }
-
     if (type === 'SET_STATE') return;
 
-    // Parse action type: ADD_INCOME -> { op: 'ADD', collection: 'incomes' }
     const parts = type.split('_');
     const op = parts[0];
     const entityMap = {
@@ -150,11 +158,9 @@ async function syncToFirestore(uid, action, newState) {
 
     if (op === 'ADD' || op === 'UPDATE') {
       const item = op === 'ADD'
-        ? newState[colName].find(i => i.id === (payload.id || newState[colName][newState[colName].length - 1]?.id))
+        ? newState[colName][newState[colName].length - 1]
         : payload;
-      if (item) {
-        await setDoc(doc(db, 'users', uid, colName, item.id), item);
-      }
+      if (item) await setDoc(doc(db, 'users', uid, colName, item.id), item);
     } else if (op === 'DELETE') {
       await deleteDoc(doc(db, 'users', uid, colName, payload));
     }
@@ -165,35 +171,36 @@ async function syncToFirestore(uid, action, newState) {
 
 export function AppProvider({ children }) {
   const { user } = useAuth();
-  const [state, baseDispatch] = useReducer(reducer, defaultState);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [state, baseDispatch] = useReducer(reducer, defaultState, () =>
+    isFirebaseConfigured ? defaultState : loadLocalState()
+  );
+  const [dataLoading, setDataLoading] = useState(isFirebaseConfigured);
 
-  // Load data when user changes
+  // Load data from Firestore when user logs in (Firebase mode only)
   useEffect(() => {
-    if (!user?.id) {
-      baseDispatch({ type: 'SET_STATE', payload: defaultState });
+    if (!isFirebaseConfigured || !user?.id) {
       setDataLoading(false);
       return;
     }
 
     setDataLoading(true);
-    loadUserData(user.id)
-      .then(data => {
-        baseDispatch({ type: 'SET_STATE', payload: data });
-      })
-      .catch(err => {
-        console.error('Failed to load user data:', err);
-      })
+    loadFirestoreData(user.id)
+      .then(data => baseDispatch({ type: 'SET_STATE', payload: data }))
+      .catch(err => console.error('Failed to load user data:', err))
       .finally(() => setDataLoading(false));
   }, [user?.id]);
 
-  // Wrap dispatch to sync with Firestore
+  // Save to localStorage in local mode
+  useEffect(() => {
+    if (!isFirebaseConfigured) {
+      saveLocalState(state);
+    }
+  }, [state]);
+
   const dispatch = useCallback((action) => {
     baseDispatch(action);
 
-    if (user?.id && action.type !== 'SET_STATE') {
-      // Get new state after dispatch by running reducer manually
-      // We need to sync the result, not the current state
+    if (isFirebaseConfigured && user?.id && action.type !== 'SET_STATE') {
       const newState = reducer(state, action);
       syncToFirestore(user.id, action, newState);
     }
