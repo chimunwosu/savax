@@ -148,7 +148,7 @@ export default function Settings() {
           <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>About Savax</h3>
         </div>
         <p className="text-sm text-gray">
-          Savax v2.0 — Built on the timeless wealth-building wisdom of The Richest Man in Babylon.
+          Savax v2.0 — Built on the timeless wealth-building wisdom of "The Richest Man in Babylon" by George S. Clason (1926).
           Your data is securely stored in the cloud and syncs across all your devices.
         </p>
       </div>
