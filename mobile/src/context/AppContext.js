@@ -45,8 +45,22 @@ function reducer(state, action) {
       return { ...state, goals: state.goals.map(g => g.id === action.payload.id ? action.payload : g) };
     case 'DELETE_GOAL':
       return { ...state, goals: state.goals.filter(g => g.id !== action.payload) };
+    case 'UPDATE_INVESTMENT':
+      return { ...state, investments: state.investments.map(i => i.id === action.payload.id ? action.payload : i) };
+    case 'ADD_DEBT':
+      return { ...state, debts: [...state.debts, { ...action.payload, id: generateId() }] };
+    case 'UPDATE_DEBT':
+      return { ...state, debts: state.debts.map(d => d.id === action.payload.id ? action.payload : d) };
+    case 'DELETE_DEBT':
+      return { ...state, debts: state.debts.filter(d => d.id !== action.payload) };
+    case 'ADD_ASSET':
+      return { ...state, assets: [...state.assets, { ...action.payload, id: generateId() }] };
+    case 'DELETE_ASSET':
+      return { ...state, assets: state.assets.filter(a => a.id !== action.payload) };
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.payload } };
+    case 'IMPORT_DATA':
+      return { ...defaultState, ...action.payload, settings: { ...defaultState.settings, ...action.payload?.settings } };
     case 'LOAD_DATA':
       return { ...defaultState, ...action.payload, settings: { ...defaultState.settings, ...action.payload?.settings } };
     default:
