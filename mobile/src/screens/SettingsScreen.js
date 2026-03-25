@@ -4,11 +4,19 @@ import { useApp } from '../context/AppContext';
 import { formatCurrency } from '../utils/helpers';
 import { colors, fonts } from '../theme';
 
-const CURRENCIES = ['USD', 'NGN', 'EUR', 'GBP', 'CAD', 'AUD'];
+const CURRENCIES = [
+  { code: 'USD', name: 'US Dollar', symbol: '$' },
+  { code: 'NGN', name: 'Nigerian Naira', symbol: 'N' },
+  { code: 'EUR', name: 'Euro', symbol: 'E' },
+  { code: 'GBP', name: 'British Pound', symbol: 'L' },
+  { code: 'CAD', name: 'Canadian Dollar', symbol: '$' },
+  { code: 'AUD', name: 'Australian Dollar', symbol: '$' },
+];
 
 export default function SettingsScreen() {
   const { state, dispatch } = useApp();
   const s = state.settings;
+  const currency = s.currency || 'USD';
 
   function updateSetting(key, value) {
     const updates = { [key]: value };
@@ -39,10 +47,11 @@ export default function SettingsScreen() {
       {/* Profile */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Profile</Text>
-        <Text style={styles.inputLabel}>Your Name</Text>
+        <Text style={styles.fieldLabel}>Your Name</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your name"
+          placeholderTextColor={colors.gray300}
           value={s.name}
           onChangeText={v => updateSetting('name', v)}
         />
@@ -84,7 +93,9 @@ export default function SettingsScreen() {
           <View style={styles.rateItem}>
             <View style={[styles.rateDot, { backgroundColor: colors.orange }]} />
             <Text style={styles.rateLabel}>Live</Text>
-            <Text style={styles.rateFixed}>{s.livingRate}%</Text>
+            <View style={styles.rateFixedWrap}>
+              <Text style={styles.rateFixed}>{s.livingRate}%</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -92,14 +103,17 @@ export default function SettingsScreen() {
       {/* Currency */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Currency</Text>
-        <View style={styles.currencyRow}>
+        <Text style={styles.currencyHint}>Select your preferred currency for all amounts</Text>
+        <View style={styles.currencyGrid}>
           {CURRENCIES.map(c => (
             <TouchableOpacity
-              key={c}
-              style={[styles.currencyBtn, s.currency === c && styles.currencyBtnActive]}
-              onPress={() => updateSetting('currency', c)}
+              key={c.code}
+              style={[styles.currencyBtn, currency === c.code && styles.currencyBtnActive]}
+              onPress={() => updateSetting('currency', c.code)}
+              activeOpacity={0.7}
             >
-              <Text style={[styles.currencyText, s.currency === c && styles.currencyTextActive]}>{c}</Text>
+              <Text style={[styles.currencyCode, currency === c.code && styles.currencyCodeActive]}>{c.code}</Text>
+              <Text style={[styles.currencyName, currency === c.code && styles.currencyNameActive]}>{c.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -108,7 +122,7 @@ export default function SettingsScreen() {
       {/* Data */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Data Management</Text>
-        <TouchableOpacity style={styles.dangerBtn} onPress={handleClear}>
+        <TouchableOpacity style={styles.dangerBtn} onPress={handleClear} activeOpacity={0.7}>
           <Text style={styles.dangerBtnText}>Clear All Data</Text>
         </TouchableOpacity>
       </View>
@@ -128,26 +142,30 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.cream },
-  card: { padding: 16, borderRadius: 12, backgroundColor: colors.white, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6 },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: colors.navy, marginBottom: 12 },
-  inputLabel: { fontSize: 12, fontWeight: '500', color: colors.gray600, marginBottom: 4 },
-  input: { backgroundColor: colors.gray50, borderWidth: 1, borderColor: colors.gray200, borderRadius: 10, padding: 12, fontSize: 15 },
-  splitRow: { flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 16 },
+  card: { padding: 18, borderRadius: 16, backgroundColor: colors.white, marginBottom: 16, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.navy, marginBottom: 14 },
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.gray600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { backgroundColor: colors.gray50, borderWidth: 1.5, borderColor: colors.gray200, borderRadius: 12, padding: 14, fontSize: 16, color: colors.gray800 },
+  splitRow: { flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden', marginBottom: 18 },
   splitSegment: { height: '100%' },
   rateRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   rateItem: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  rateDot: { width: 8, height: 8, borderRadius: 4 },
-  rateLabel: { fontSize: 12, fontWeight: '500', color: colors.gray600 },
-  rateInput: { backgroundColor: colors.gray50, borderWidth: 1, borderColor: colors.gray200, borderRadius: 6, padding: 6, fontSize: 14, width: 40, textAlign: 'center' },
-  ratePct: { fontSize: 12, color: colors.gray500 },
-  rateFixed: { fontSize: 14, fontWeight: '600', color: colors.gray700 },
-  currencyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  currencyBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, backgroundColor: colors.gray100 },
-  currencyBtnActive: { backgroundColor: colors.gold },
-  currencyText: { fontSize: 14, fontWeight: '600', color: colors.gray600 },
-  currencyTextActive: { color: colors.navy },
-  dangerBtn: { padding: 14, borderRadius: 10, backgroundColor: colors.red + '12', alignItems: 'center' },
-  dangerBtnText: { fontSize: 14, fontWeight: '600', color: colors.red },
+  rateDot: { width: 10, height: 10, borderRadius: 5 },
+  rateLabel: { fontSize: 13, fontWeight: '600', color: colors.gray600 },
+  rateInput: { backgroundColor: colors.gray50, borderWidth: 1.5, borderColor: colors.gray200, borderRadius: 8, padding: 6, fontSize: 15, width: 42, textAlign: 'center', fontWeight: '700', color: colors.gray800 },
+  ratePct: { fontSize: 13, fontWeight: '600', color: colors.gray500 },
+  rateFixedWrap: { backgroundColor: colors.gray100, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  rateFixed: { fontSize: 15, fontWeight: '700', color: colors.gray700 },
+  currencyHint: { fontSize: 12, color: colors.gray400, marginBottom: 12 },
+  currencyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  currencyBtn: { width: '30%', padding: 14, borderRadius: 14, backgroundColor: colors.gray100, alignItems: 'center', borderWidth: 2, borderColor: 'transparent' },
+  currencyBtnActive: { backgroundColor: colors.gold + '15', borderColor: colors.gold },
+  currencyCode: { fontSize: 16, fontWeight: '700', color: colors.gray500 },
+  currencyCodeActive: { color: colors.navy },
+  currencyName: { fontSize: 10, color: colors.gray400, marginTop: 2 },
+  currencyNameActive: { color: colors.gold, fontWeight: '600' },
+  dangerBtn: { padding: 16, borderRadius: 14, backgroundColor: colors.red + '10', alignItems: 'center', borderWidth: 1.5, borderColor: colors.red + '25' },
+  dangerBtnText: { fontSize: 15, fontWeight: '700', color: colors.red },
   aboutTitle: { fontSize: 14, fontWeight: '700', color: colors.gold, marginBottom: 4 },
   aboutText: { fontSize: 12, color: colors.gray500, lineHeight: 18 },
 });

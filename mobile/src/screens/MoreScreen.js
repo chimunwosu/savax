@@ -5,13 +5,13 @@ import { getRandomWisdom } from '../data/babylonWisdom';
 import { colors } from '../theme';
 
 const MENU_ITEMS = [
-  { label: 'Investments', screen: 'Investments', description: 'Track your portfolio', color: colors.blue },
-  { label: 'Debt Payoff', screen: 'DebtPayoff', description: 'Eliminate debt strategically', color: colors.red },
-  { label: 'Financial Reports', screen: 'Reports', description: 'Review your progress', color: colors.emerald },
-  { label: 'Wealth Advisor', screen: 'Advisor', description: 'Personalized financial guidance', color: colors.purple },
-  { label: 'Compound Calculator', screen: 'Calculator', description: 'Watch your money grow', color: colors.gold },
-  { label: 'Net Worth', screen: 'NetWorth', description: 'Know your true wealth', color: colors.orange },
-  { label: 'Settings', screen: 'Settings', description: 'Configure your preferences', color: colors.gray600 },
+  { label: 'Investments', screen: 'Investments', description: 'Track your portfolio', color: colors.blue, icon: '%' },
+  { label: 'Debt Payoff', screen: 'DebtPayoff', description: 'Eliminate debt strategically', color: colors.red, icon: '-' },
+  { label: 'Financial Reports', screen: 'Reports', description: 'Review your progress', color: colors.emerald, icon: '#' },
+  { label: 'Wealth Advisor', screen: 'Advisor', description: 'Personalized financial guidance', color: colors.purple, icon: '*' },
+  { label: 'Compound Calculator', screen: 'Calculator', description: 'Watch your money grow', color: colors.gold, icon: 'x' },
+  { label: 'Net Worth', screen: 'NetWorth', description: 'Know your true wealth', color: colors.orange, icon: '=' },
+  { label: 'Settings', screen: 'Settings', description: 'Configure your preferences', color: colors.gray600, icon: '@' },
 ];
 
 export default function MoreScreen({ navigation }) {
@@ -58,13 +58,18 @@ export default function MoreScreen({ navigation }) {
           key={i}
           style={styles.menuItem}
           onPress={() => navigation.navigate(item.screen)}
+          activeOpacity={0.7}
         >
-          <View style={[styles.menuDot, { backgroundColor: item.color }]} />
+          <View style={[styles.menuIcon, { backgroundColor: item.color + '15' }]}>
+            <Text style={[styles.menuIconText, { color: item.color }]}>{item.icon}</Text>
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.menuLabel}>{item.label}</Text>
             <Text style={styles.menuDesc}>{item.description}</Text>
           </View>
-          <Text style={styles.menuArrow}>›</Text>
+          <View style={styles.menuArrowWrap}>
+            <Text style={styles.menuArrow}>&rsaquo;</Text>
+          </View>
         </TouchableOpacity>
       ))}
 
@@ -83,25 +88,27 @@ export default function MoreScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.cream },
-  scoreCard: { alignItems: 'center', padding: 20, borderRadius: 12, backgroundColor: colors.white, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6, marginBottom: 12 },
-  scoreLabel: { fontSize: 11, color: colors.gray500, letterSpacing: 1, fontWeight: '600' },
-  scoreGrade: { fontSize: 44, fontWeight: '700', marginTop: 2 },
-  scoreNum: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
-  progressBar: { width: '100%', height: 6, backgroundColor: colors.gray100, borderRadius: 3, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 3 },
-  wisdomCard: { padding: 20, borderRadius: 12, backgroundColor: colors.navy, marginBottom: 16 },
+  scoreCard: { alignItems: 'center', padding: 24, borderRadius: 16, backgroundColor: colors.white, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, marginBottom: 12 },
+  scoreLabel: { fontSize: 12, color: colors.gray500, letterSpacing: 1.5, fontWeight: '700' },
+  scoreGrade: { fontSize: 48, fontWeight: '700', marginTop: 4 },
+  scoreNum: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
+  progressBar: { width: '100%', height: 8, backgroundColor: colors.gray100, borderRadius: 4, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 4 },
+  wisdomCard: { padding: 20, borderRadius: 16, backgroundColor: colors.navy, marginBottom: 16, elevation: 4, shadowColor: colors.navy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
   wisdomLabel: { fontSize: 11, color: colors.gold, fontWeight: '700', letterSpacing: 1, marginBottom: 8 },
   wisdomText: { fontSize: 14, color: '#ffffffcc', fontStyle: 'italic', lineHeight: 22 },
   menuItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: colors.white, padding: 16, borderRadius: 12, marginBottom: 8,
-    elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: colors.white, padding: 16, borderRadius: 16, marginBottom: 10,
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 6,
   },
-  menuDot: { width: 12, height: 12, borderRadius: 6 },
-  menuLabel: { fontSize: 15, fontWeight: '600', color: colors.gray800 },
-  menuDesc: { fontSize: 12, color: colors.gray400, marginTop: 1 },
-  menuArrow: { fontSize: 24, color: colors.gray300, fontWeight: '300' },
-  aboutCard: { padding: 16, borderRadius: 12, backgroundColor: colors.white, marginTop: 8, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6 },
+  menuIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  menuIconText: { fontSize: 18, fontWeight: '700' },
+  menuLabel: { fontSize: 16, fontWeight: '700', color: colors.gray800 },
+  menuDesc: { fontSize: 12, color: colors.gray400, marginTop: 2 },
+  menuArrowWrap: { width: 32, height: 32, borderRadius: 10, backgroundColor: colors.gray100, alignItems: 'center', justifyContent: 'center' },
+  menuArrow: { fontSize: 20, color: colors.gray400, fontWeight: '500', marginTop: -2 },
+  aboutCard: { padding: 18, borderRadius: 16, backgroundColor: colors.white, marginTop: 8, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
   aboutTitle: { fontSize: 14, fontWeight: '700', color: colors.gold, marginBottom: 4 },
   aboutText: { fontSize: 12, color: colors.gray500, lineHeight: 18 },
 });

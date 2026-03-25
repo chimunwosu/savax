@@ -7,6 +7,7 @@ import { colors, fonts } from '../theme';
 
 export default function ReportsScreen() {
   const { state } = useApp();
+  const currency = state.settings.currency || 'USD';
 
   const { monthlyData, categoryData, insights } = useMemo(() => {
     const months = getMonthRange(6);
@@ -78,8 +79,8 @@ export default function ReportsScreen() {
         {monthlyData.map((m, i) => (
           <View key={i} style={styles.tableRow}>
             <Text style={[styles.tableCell, { flex: 1 }]}>{m.month}</Text>
-            <Text style={[styles.tableCell, { flex: 1.2, textAlign: 'right', color: colors.emerald }]}>{formatCurrency(m.income)}</Text>
-            <Text style={[styles.tableCell, { flex: 1.2, textAlign: 'right', color: colors.red }]}>{formatCurrency(m.expenses)}</Text>
+            <Text style={[styles.tableCell, { flex: 1.2, textAlign: 'right', color: colors.emerald }]}>{formatCurrency(m.income, currency)}</Text>
+            <Text style={[styles.tableCell, { flex: 1.2, textAlign: 'right', color: colors.red }]}>{formatCurrency(m.expenses, currency)}</Text>
             <Text style={[styles.tableCell, { flex: 0.8, textAlign: 'right', fontWeight: '700', color: m.savingsRate >= 10 ? colors.emerald : colors.red }]}>
               {m.savingsRate}%
             </Text>
@@ -101,7 +102,7 @@ export default function ReportsScreen() {
                 <View style={[styles.catDot, { backgroundColor: catColor }]} />
                 <Text style={styles.catName}>{cat.name}</Text>
               </View>
-              <Text style={styles.catAmount}>{formatCurrency(cat.value)}</Text>
+              <Text style={styles.catAmount}>{formatCurrency(cat.value, currency)}</Text>
               <Text style={styles.catPct}>{pct.toFixed(0)}%</Text>
             </View>
           );
@@ -116,11 +117,11 @@ export default function ReportsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.cream },
   insightsRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  insightBox: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: colors.white, alignItems: 'center', elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6 },
+  insightBox: { flex: 1, padding: 14, borderRadius: 16, backgroundColor: colors.white, alignItems: 'center', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
   insightLabel: { ...fonts.statLabel, textAlign: 'center' },
   insightValue: { fontSize: 18, fontWeight: '700', marginTop: 4 },
-  card: { padding: 16, borderRadius: 12, backgroundColor: colors.white, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6 },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: colors.navy, marginBottom: 12 },
+  card: { padding: 18, borderRadius: 16, backgroundColor: colors.white, marginBottom: 16, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.navy, marginBottom: 14 },
   tableHeader: { flexDirection: 'row', paddingBottom: 8, borderBottomWidth: 2, borderBottomColor: colors.gray200 },
   tableCol: { fontSize: 10, fontWeight: '600', color: colors.gray500, textTransform: 'uppercase' },
   tableRow: { flexDirection: 'row', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.gray100 },

@@ -12,6 +12,7 @@ export default function GoalsScreen() {
   const [showFund, setShowFund] = useState(null);
   const [fundAmount, setFundAmount] = useState('');
   const [form, setForm] = useState({ name: '', targetAmount: '', currentAmount: '0', category: 'emergency' });
+  const currency = state.settings.currency || 'USD';
 
   function handleSave() {
     if (!form.name || !form.targetAmount) return;
@@ -46,7 +47,11 @@ export default function GoalsScreen() {
               <View key={goal.id} style={[styles.goalCard, { borderLeftColor: color }]}>
                 <View style={styles.goalHeader}>
                   <Text style={styles.goalName}>{goal.name}</Text>
-                  {pct >= 100 && <Text style={styles.completedBadge}>Completed!</Text>}
+                  {pct >= 100 && (
+                    <View style={styles.completedBadge}>
+                      <Text style={styles.completedText}>Completed!</Text>
+                    </View>
+                  )}
                 </View>
                 <View style={styles.progressBar}>
                   <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: color }]} />
@@ -54,7 +59,7 @@ export default function GoalsScreen() {
                 <View style={styles.goalStats}>
                   <View>
                     <Text style={styles.goalStatLabel}>Saved</Text>
-                    <Text style={[styles.goalStatValue, { color: colors.emerald }]}>{formatCurrency(goal.currentAmount)}</Text>
+                    <Text style={[styles.goalStatValue, { color: colors.emerald }]}>{formatCurrency(goal.currentAmount, currency)}</Text>
                   </View>
                   <View style={{ alignItems: 'center' }}>
                     <Text style={styles.goalStatLabel}>Progress</Text>
@@ -62,14 +67,14 @@ export default function GoalsScreen() {
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={styles.goalStatLabel}>Target</Text>
-                    <Text style={[styles.goalStatValue, { color: colors.gold }]}>{formatCurrency(goal.targetAmount)}</Text>
+                    <Text style={[styles.goalStatValue, { color: colors.gold }]}>{formatCurrency(goal.targetAmount, currency)}</Text>
                   </View>
                 </View>
                 <View style={styles.goalActions}>
-                  <TouchableOpacity style={styles.fundBtn} onPress={() => { setShowFund(goal); setFundAmount(''); }}>
+                  <TouchableOpacity style={styles.fundBtn} onPress={() => { setShowFund(goal); setFundAmount(''); }} activeOpacity={0.7}>
                     <Text style={styles.fundBtnText}>+ Add Funds</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => dispatch({ type: 'DELETE_GOAL', payload: goal.id })}>
+                  <TouchableOpacity style={styles.deleteBtnWrap} onPress={() => dispatch({ type: 'DELETE_GOAL', payload: goal.id })} activeOpacity={0.7}>
                     <Text style={styles.deleteBtn}>Delete</Text>
                   </TouchableOpacity>
                 </View>
@@ -79,7 +84,7 @@ export default function GoalsScreen() {
         )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)}>
+      <TouchableOpacity style={styles.fab} onPress={() => setShowModal(true)} activeOpacity={0.8}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
@@ -87,23 +92,33 @@ export default function GoalsScreen() {
       <Modal visible={showModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
+            <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>New Savings Goal</Text>
-            <TextInput style={styles.input} placeholder="Goal Name" value={form.name} onChangeText={v => setForm({ ...form, name: v })} />
-            <TextInput style={styles.input} placeholder="Target Amount" keyboardType="numeric" value={form.targetAmount} onChangeText={v => setForm({ ...form, targetAmount: v })} />
-            <TextInput style={styles.input} placeholder="Starting Amount (optional)" keyboardType="numeric" value={form.currentAmount} onChangeText={v => setForm({ ...form, currentAmount: v })} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+
+            <Text style={styles.fieldLabel}>Goal Name</Text>
+            <TextInput style={styles.input} placeholder="e.g., Emergency Fund" placeholderTextColor={colors.gray300} value={form.name} onChangeText={v => setForm({ ...form, name: v })} />
+
+            <Text style={styles.fieldLabel}>Target Amount</Text>
+            <TextInput style={styles.input} placeholder="0.00" placeholderTextColor={colors.gray300} keyboardType="numeric" value={form.targetAmount} onChangeText={v => setForm({ ...form, targetAmount: v })} />
+
+            <Text style={styles.fieldLabel}>Starting Amount (optional)</Text>
+            <TextInput style={styles.input} placeholder="0.00" placeholderTextColor={colors.gray300} keyboardType="numeric" value={form.currentAmount} onChangeText={v => setForm({ ...form, currentAmount: v })} />
+
+            <Text style={styles.fieldLabel}>Category</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
               {CATEGORIES.map(c => (
-                <TouchableOpacity key={c} style={[styles.catChip, form.category === c && styles.catChipActive]} onPress={() => setForm({ ...form, category: c })}>
+                <TouchableOpacity key={c} style={[styles.catChip, form.category === c && styles.catChipActive]} onPress={() => setForm({ ...form, category: c })} activeOpacity={0.7}>
                   <Text style={[styles.catChipText, form.category === c && styles.catChipTextActive]}>{c}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.btnCancel} onPress={() => setShowModal(false)}>
+              <TouchableOpacity style={styles.btnCancel} onPress={() => setShowModal(false)} activeOpacity={0.7}>
                 <Text style={styles.btnCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnSave} onPress={handleSave}>
-                <Text style={styles.btnSaveText}>Create</Text>
+              <TouchableOpacity style={styles.btnSave} onPress={handleSave} activeOpacity={0.8}>
+                <Text style={styles.btnSaveText}>Create Goal</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -114,14 +129,18 @@ export default function GoalsScreen() {
       <Modal visible={!!showFund} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
+            <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Add Funds to {showFund?.name}</Text>
-            <TextInput style={styles.input} placeholder="Amount" keyboardType="numeric" value={fundAmount} onChangeText={setFundAmount} autoFocus />
+
+            <Text style={styles.fieldLabel}>Amount</Text>
+            <TextInput style={styles.input} placeholder="0.00" placeholderTextColor={colors.gray300} keyboardType="numeric" value={fundAmount} onChangeText={setFundAmount} autoFocus />
+
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.btnCancel} onPress={() => setShowFund(null)}>
+              <TouchableOpacity style={styles.btnCancel} onPress={() => setShowFund(null)} activeOpacity={0.7}>
                 <Text style={styles.btnCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnSave} onPress={handleFund}>
-                <Text style={styles.btnSaveText}>Add</Text>
+              <TouchableOpacity style={styles.btnSave} onPress={handleFund} activeOpacity={0.8}>
+                <Text style={styles.btnSaveText}>+ Add Funds</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -137,38 +156,44 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.gray500, marginBottom: 4 },
   emptyText: { fontSize: 13, color: colors.gray400 },
   goalCard: {
-    backgroundColor: colors.white, borderRadius: 12, padding: 16, marginBottom: 12,
-    borderLeftWidth: 4, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6,
+    backgroundColor: colors.white, borderRadius: 16, padding: 18, marginBottom: 14,
+    borderLeftWidth: 4, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8,
   },
-  goalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  goalName: { fontSize: 16, fontWeight: '700', color: colors.navy },
-  completedBadge: { fontSize: 11, fontWeight: '600', color: colors.emerald, backgroundColor: colors.emerald + '18', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
-  progressBar: { height: 8, backgroundColor: colors.gray100, borderRadius: 4, overflow: 'hidden', marginBottom: 12 },
-  progressFill: { height: '100%', borderRadius: 4 },
-  goalStats: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  goalStatLabel: { fontSize: 10, color: colors.gray400, textTransform: 'uppercase' },
-  goalStatValue: { fontSize: 15, fontWeight: '700', marginTop: 2 },
+  goalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  goalName: { fontSize: 17, fontWeight: '700', color: colors.navy },
+  completedBadge: { backgroundColor: colors.emerald + '15', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
+  completedText: { fontSize: 11, fontWeight: '700', color: colors.emerald },
+  progressBar: { height: 10, backgroundColor: colors.gray100, borderRadius: 5, overflow: 'hidden', marginBottom: 14 },
+  progressFill: { height: '100%', borderRadius: 5 },
+  goalStats: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 },
+  goalStatLabel: { fontSize: 10, color: colors.gray400, textTransform: 'uppercase', fontWeight: '600' },
+  goalStatValue: { fontSize: 16, fontWeight: '700', marginTop: 2 },
   goalActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  fundBtn: { backgroundColor: colors.emerald + '15', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
-  fundBtnText: { fontSize: 13, fontWeight: '600', color: colors.emerald },
-  deleteBtn: { fontSize: 12, color: colors.red },
+  fundBtn: { backgroundColor: colors.emerald + '12', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.emerald + '30' },
+  fundBtnText: { fontSize: 14, fontWeight: '700', color: colors.emerald },
+  deleteBtnWrap: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.red + '10' },
+  deleteBtn: { fontSize: 13, fontWeight: '600', color: colors.red },
+
   fab: {
-    position: 'absolute', bottom: 20, right: 20, width: 56, height: 56,
-    borderRadius: 28, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center',
-    elevation: 6, shadowColor: colors.goldDark, shadowOpacity: 0.3, shadowRadius: 8,
+    position: 'absolute', bottom: 24, right: 24, width: 60, height: 60,
+    borderRadius: 30, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center',
+    elevation: 8, shadowColor: colors.goldDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10,
   },
-  fabText: { fontSize: 28, color: colors.navy, fontWeight: '300', marginTop: -2 },
-  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  modal: { backgroundColor: colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.navy, marginBottom: 20 },
-  input: { backgroundColor: colors.gray50, borderWidth: 1, borderColor: colors.gray200, borderRadius: 10, padding: 14, fontSize: 15, marginBottom: 12 },
-  catChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.gray100, marginRight: 8, textTransform: 'capitalize' },
-  catChipActive: { backgroundColor: colors.gold },
-  catChipText: { fontSize: 12, color: colors.gray600, textTransform: 'capitalize' },
-  catChipTextActive: { color: colors.navy, fontWeight: '600' },
+  fabText: { fontSize: 30, color: colors.navy, fontWeight: '400', marginTop: -2 },
+
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modal: { backgroundColor: colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingTop: 16 },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.gray200, alignSelf: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: colors.navy, marginBottom: 20 },
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.gray600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { backgroundColor: colors.gray50, borderWidth: 1.5, borderColor: colors.gray200, borderRadius: 12, padding: 14, fontSize: 16, marginBottom: 16, color: colors.gray800 },
+  catChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, backgroundColor: colors.gray100, marginRight: 8, borderWidth: 1.5, borderColor: 'transparent' },
+  catChipActive: { backgroundColor: colors.gold + '18', borderColor: colors.gold },
+  catChipText: { fontSize: 13, fontWeight: '500', color: colors.gray500, textTransform: 'capitalize' },
+  catChipTextActive: { color: colors.navy, fontWeight: '700' },
   modalActions: { flexDirection: 'row', gap: 12 },
-  btnCancel: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: colors.gray100, alignItems: 'center' },
-  btnCancelText: { fontWeight: '600', color: colors.gray600 },
-  btnSave: { flex: 1, padding: 14, borderRadius: 10, backgroundColor: colors.gold, alignItems: 'center' },
-  btnSaveText: { fontWeight: '600', color: colors.navy },
+  btnCancel: { flex: 1, padding: 16, borderRadius: 14, backgroundColor: colors.gray100, alignItems: 'center', borderWidth: 1, borderColor: colors.gray200 },
+  btnCancelText: { fontSize: 15, fontWeight: '600', color: colors.gray600 },
+  btnSave: { flex: 1.5, padding: 16, borderRadius: 14, backgroundColor: colors.gold, alignItems: 'center', elevation: 3, shadowColor: colors.goldDark, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 6 },
+  btnSaveText: { fontSize: 15, fontWeight: '700', color: colors.navy },
 });

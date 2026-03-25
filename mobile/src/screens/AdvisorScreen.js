@@ -7,6 +7,7 @@ import { colors, fonts } from '../theme';
 
 export default function AdvisorScreen() {
   const { state } = useApp();
+  const currency = state.settings.currency || 'USD';
 
   const analysis = useMemo(() => {
     const totalIncome = sumByField(state.incomes, 'amount');
@@ -35,7 +36,7 @@ export default function AdvisorScreen() {
     if (totalIncome === 0) actions.push('Start by recording your income sources');
     if (savingsRate < 10 && totalIncome > 0) actions.push(`Increase savings to at least 10% (currently ${savingsRate.toFixed(1)}%)`);
     if (totalInvested === 0 && totalIncome > 0) actions.push('Begin investing to make your money grow');
-    if (totalDebt > 0) actions.push(`Focus on eliminating ${formatCurrency(totalDebt)} in debt`);
+    if (totalDebt > 0) actions.push(`Focus on eliminating ${formatCurrency(totalDebt, currency)} in debt`);
     if (state.goals.length === 0) actions.push('Set a savings goal to stay motivated');
     if (!budgetOk && totalIncome > 0) actions.push('Reduce expenses to stay within 70% of income');
     if (actions.length === 0) actions.push('Keep up the excellent work! You follow the 7 wealth principles perfectly.');
@@ -45,7 +46,7 @@ export default function AdvisorScreen() {
       let status = '';
       if (i === 0) { progress = Math.min(100, savingsRate * 10); status = savingsRate >= 10 ? 'Saving at least 10%' : `Currently at ${savingsRate.toFixed(1)}%`; }
       else if (i === 1) { progress = budgetOk ? 100 : Math.min(99, (totalIncome * 0.7 / Math.max(totalExpenses, 1)) * 100); status = budgetOk ? 'Within budget' : 'Over budget'; }
-      else if (i === 2) { progress = Math.min(100, investmentRate * 5); status = totalInvested > 0 ? `${formatCurrency(totalInvested)} invested` : 'Start investing'; }
+      else if (i === 2) { progress = Math.min(100, investmentRate * 5); status = totalInvested > 0 ? `${formatCurrency(totalInvested, currency)} invested` : 'Start investing'; }
       else if (i === 3) { progress = totalDebt === 0 ? 100 : 50; status = totalDebt === 0 ? 'No risky debts' : 'Reduce debt exposure'; }
       else if (i === 4) { const has = state.assets.some(a => a.type === 'asset') || state.investments.length > 0; progress = has ? 75 : 0; status = has ? 'Own assets' : 'Acquire assets'; }
       else if (i === 5) { const has = state.goals.some(g => g.category === 'retirement'); progress = has ? 75 : 0; status = has ? 'Planning retirement' : 'Plan for future'; }
@@ -81,7 +82,11 @@ export default function AdvisorScreen() {
         <Text style={styles.cardTitle}>Action Items</Text>
         {analysis.actions.map((action, i) => (
           <View key={i} style={styles.actionRow}>
-            <Text style={styles.actionDot}>{analysis.actions.length === 1 && action.includes('excellent') ? '✓' : '!'}</Text>
+            <View style={[styles.actionIcon, { backgroundColor: analysis.actions.length === 1 && action.includes('excellent') ? colors.emerald + '15' : colors.gold + '15' }]}>
+              <Text style={{ color: analysis.actions.length === 1 && action.includes('excellent') ? colors.emerald : colors.gold, fontWeight: '700', fontSize: 12 }}>
+                {analysis.actions.length === 1 && action.includes('excellent') ? '!' : '!'}
+              </Text>
+            </View>
             <Text style={styles.actionText}>{action}</Text>
           </View>
         ))}
@@ -93,15 +98,19 @@ export default function AdvisorScreen() {
         {analysis.lawData.map(law => (
           <View key={law.id} style={styles.lawItem}>
             <View style={styles.lawHeader}>
-              <View style={[styles.lawDot, { backgroundColor: law.color }]} />
+              <View style={[styles.lawIcon, { backgroundColor: law.color + '18' }]}>
+                <Text style={[styles.lawIconText, { color: law.color }]}>{law.id}</Text>
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.lawTitle}>{law.title}</Text>
                 <Text style={styles.lawStatus}>{law.status}</Text>
               </View>
-              <Text style={[styles.lawPct, { color: law.color }]}>{law.progress}%</Text>
+              <View style={[styles.lawPctBadge, { backgroundColor: law.color + '12' }]}>
+                <Text style={[styles.lawPct, { color: law.color }]}>{law.progress}%</Text>
+              </View>
             </View>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${law.progress}%`, backgroundColor: law.color }]} />
+            <View style={styles.progressBarSmall}>
+              <View style={[styles.progressFillSmall, { width: `${law.progress}%`, backgroundColor: law.color }]} />
             </View>
           </View>
         ))}
@@ -114,24 +123,28 @@ export default function AdvisorScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.cream },
-  scoreCard: { alignItems: 'center', padding: 24, borderRadius: 12, backgroundColor: colors.white, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6, marginBottom: 12 },
-  scoreLabel: { fontSize: 11, color: colors.gray500, letterSpacing: 1, fontWeight: '600' },
-  scoreGrade: { fontSize: 52, fontWeight: '700', marginTop: 4 },
-  scoreNum: { fontSize: 18, fontWeight: '600', marginBottom: 8 },
-  wisdomCard: { padding: 20, borderRadius: 12, backgroundColor: colors.navy, marginBottom: 12 },
+  scoreCard: { alignItems: 'center', padding: 28, borderRadius: 16, backgroundColor: colors.white, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, marginBottom: 12 },
+  scoreLabel: { fontSize: 12, color: colors.gray500, letterSpacing: 1.5, fontWeight: '700' },
+  scoreGrade: { fontSize: 56, fontWeight: '700', marginTop: 4 },
+  scoreNum: { fontSize: 18, fontWeight: '600', marginBottom: 10 },
+  progressBar: { width: '100%', height: 8, backgroundColor: colors.gray100, borderRadius: 4, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 4 },
+  wisdomCard: { padding: 20, borderRadius: 16, backgroundColor: colors.navy, marginBottom: 12, elevation: 4, shadowColor: colors.navy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
   wisdomLabel: { fontSize: 11, color: colors.gold, fontWeight: '700', letterSpacing: 1, marginBottom: 8 },
   wisdomText: { fontSize: 14, color: '#ffffffcc', fontStyle: 'italic', lineHeight: 22 },
-  card: { padding: 16, borderRadius: 12, backgroundColor: colors.white, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6 },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: colors.navy, marginBottom: 12 },
-  actionRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 10, backgroundColor: colors.cream, borderRadius: 8, marginBottom: 6 },
-  actionDot: { fontSize: 14, fontWeight: '700', color: colors.gold, width: 20 },
+  card: { padding: 18, borderRadius: 16, backgroundColor: colors.white, marginBottom: 12, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.navy, marginBottom: 14 },
+  actionRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 12, backgroundColor: colors.cream, borderRadius: 12, marginBottom: 8 },
+  actionIcon: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   actionText: { fontSize: 13, color: colors.gray700, flex: 1, lineHeight: 20 },
-  lawItem: { marginBottom: 14 },
-  lawHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
-  lawDot: { width: 10, height: 10, borderRadius: 5 },
-  lawTitle: { fontSize: 13, fontWeight: '600', color: colors.gray800 },
+  lawItem: { marginBottom: 16 },
+  lawHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  lawIcon: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  lawIconText: { fontSize: 13, fontWeight: '700' },
+  lawTitle: { fontSize: 14, fontWeight: '600', color: colors.gray800 },
   lawStatus: { fontSize: 11, color: colors.gray400, marginTop: 1 },
+  lawPctBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   lawPct: { fontSize: 13, fontWeight: '700' },
-  progressBar: { height: 6, backgroundColor: colors.gray100, borderRadius: 3, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 3 },
+  progressBarSmall: { height: 6, backgroundColor: colors.gray100, borderRadius: 3, overflow: 'hidden' },
+  progressFillSmall: { height: '100%', borderRadius: 3 },
 });
