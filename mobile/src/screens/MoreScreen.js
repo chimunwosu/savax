@@ -1,17 +1,18 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { formatCurrency, sumByField } from '../utils/helpers';
 import { getRandomWisdom } from '../data/babylonWisdom';
 import { colors } from '../theme';
 
 const MENU_ITEMS = [
-  { label: 'Investments', screen: 'Investments', description: 'Track your portfolio', color: colors.blue, icon: '%' },
-  { label: 'Debt Payoff', screen: 'DebtPayoff', description: 'Eliminate debt strategically', color: colors.red, icon: '-' },
-  { label: 'Financial Reports', screen: 'Reports', description: 'Review your progress', color: colors.emerald, icon: '#' },
-  { label: 'Wealth Advisor', screen: 'Advisor', description: 'Personalized financial guidance', color: colors.purple, icon: '*' },
-  { label: 'Compound Calculator', screen: 'Calculator', description: 'Watch your money grow', color: colors.gold, icon: 'x' },
-  { label: 'Net Worth', screen: 'NetWorth', description: 'Know your true wealth', color: colors.orange, icon: '=' },
-  { label: 'Settings', screen: 'Settings', description: 'Configure your preferences', color: colors.gray600, icon: '@' },
+  { label: 'Investments', screen: 'Investments', description: 'Track your portfolio', color: colors.blue, icon: 'trending-up-outline' },
+  { label: 'Debt Payoff', screen: 'DebtPayoff', description: 'Eliminate debt strategically', color: colors.red, icon: 'shield-checkmark-outline' },
+  { label: 'Financial Reports', screen: 'Reports', description: 'Review your progress', color: colors.emerald, icon: 'bar-chart-outline' },
+  { label: 'Wealth Advisor', screen: 'Advisor', description: 'Personalized financial guidance', color: colors.purple, icon: 'bulb-outline' },
+  { label: 'Compound Calculator', screen: 'Calculator', description: 'Watch your money grow', color: colors.gold, icon: 'calculator-outline' },
+  { label: 'Net Worth', screen: 'NetWorth', description: 'Know your true wealth', color: colors.orange, icon: 'diamond-outline' },
+  { label: 'Settings', screen: 'Settings', description: 'Configure your preferences', color: colors.gray600, icon: 'settings-outline' },
 ];
 
 export default function MoreScreen({ navigation }) {
@@ -61,14 +62,14 @@ export default function MoreScreen({ navigation }) {
           activeOpacity={0.7}
         >
           <View style={[styles.menuIcon, { backgroundColor: item.color + '15' }]}>
-            <Text style={[styles.menuIconText, { color: item.color }]}>{item.icon}</Text>
+            <Ionicons name={item.icon} size={22} color={item.color} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.menuLabel}>{item.label}</Text>
             <Text style={styles.menuDesc}>{item.description}</Text>
           </View>
           <View style={styles.menuArrowWrap}>
-            <Text style={styles.menuArrow}>&rsaquo;</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.gray400} />
           </View>
         </TouchableOpacity>
       ))}
