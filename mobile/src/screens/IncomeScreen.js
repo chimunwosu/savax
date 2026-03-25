@@ -5,20 +5,22 @@ import { formatCurrency, formatDate, getCurrentMonth, sumByField } from '../util
 import { colors, fonts } from '../theme';
 
 const TYPES = ['Salary', 'Freelance', 'Business', 'Passive', 'Other'];
+const INCOME_SOURCES = ['Employment Salary', 'Freelance/Contract', 'Business Revenue', 'Rental Income', 'Investment Returns', 'Side Hustle', 'Other'];
 
 export default function IncomeScreen() {
   const { state, dispatch } = useApp();
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ amount: '', source: '', type: 'Salary', date: new Date().toISOString().split('T')[0] });
+  const [form, setForm] = useState({ amount: '', source: '', customSource: '', type: 'Salary', date: new Date().toISOString().split('T')[0] });
 
   const currentMonth = getCurrentMonth();
   const totalIncome = sumByField(state.incomes, 'amount');
   const monthlyIncome = sumByField(state.incomes.filter(i => i.date?.startsWith(currentMonth)), 'amount');
 
   function handleSave() {
-    if (!form.amount || !form.source) return;
-    dispatch({ type: 'ADD_INCOME', payload: { ...form, amount: Number(form.amount) } });
-    setForm({ amount: '', source: '', type: 'Salary', date: new Date().toISOString().split('T')[0] });
+    const finalSource = form.source === 'Other' ? form.customSource : form.source;
+    if (!form.amount || !finalSource) return;
+    dispatch({ type: 'ADD_INCOME', payload: { ...form, source: finalSource, amount: Number(form.amount) } });
+    setForm({ amount: '', source: '', customSource: '', type: 'Salary', date: new Date().toISOString().split('T')[0] });
     setShowModal(false);
   }
 
@@ -86,7 +88,21 @@ export default function IncomeScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Add Income</Text>
             <TextInput style={styles.input} placeholder="Amount" keyboardType="numeric" value={form.amount} onChangeText={v => setForm({ ...form, amount: v })} />
-            <TextInput style={styles.input} placeholder="Source (e.g., Salary)" value={form.source} onChangeText={v => setForm({ ...form, source: v })} />
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.gray700, marginBottom: 8 }}>Source</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+              {INCOME_SOURCES.map(s => (
+                <TouchableOpacity
+                  key={s}
+                  style={[styles.sourceChip, form.source === s && styles.sourceChipActive]}
+                  onPress={() => setForm({ ...form, source: s, customSource: '' })}
+                >
+                  <Text style={[styles.sourceChipText, form.source === s && styles.sourceChipTextActive]}>{s}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {form.source === 'Other' && (
+              <TextInput style={styles.input} placeholder="Enter your income source" value={form.customSource} onChangeText={v => setForm({ ...form, customSource: v })} />
+            )}
             <View style={styles.typeRow}>
               {TYPES.map(t => (
                 <TouchableOpacity key={t} style={[styles.typeChip, form.type === t && styles.typeChipActive]} onPress={() => setForm({ ...form, type: t })}>
@@ -142,6 +158,10 @@ const styles = StyleSheet.create({
   modal: { backgroundColor: colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.navy, marginBottom: 20 },
   input: { backgroundColor: colors.gray50, borderWidth: 1, borderColor: colors.gray200, borderRadius: 10, padding: 14, fontSize: 15, marginBottom: 12 },
+  sourceChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: colors.gray200, marginRight: 8 },
+  sourceChipActive: { backgroundColor: colors.gold + '22', borderColor: colors.gold },
+  sourceChipText: { fontSize: 12, color: colors.gray600 },
+  sourceChipTextActive: { color: colors.navy, fontWeight: '600' },
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   typeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: colors.gray100 },
   typeChipActive: { backgroundColor: colors.gold },

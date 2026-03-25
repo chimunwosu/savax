@@ -6,7 +6,9 @@ import { Plus, Edit2, Trash2, Wallet } from 'lucide-react';
 
 const INCOME_TYPES = ['Salary', 'Freelance', 'Business', 'Passive', 'Other'];
 
-const emptyForm = { amount: '', source: '', date: new Date().toISOString().split('T')[0], type: 'Salary', notes: '' };
+const INCOME_SOURCES = ['Employment Salary', 'Freelance/Contract', 'Business Revenue', 'Rental Income', 'Investment Returns', 'Side Hustle', 'Other'];
+
+const emptyForm = { amount: '', source: '', customSource: '', date: new Date().toISOString().split('T')[0], type: 'Salary', notes: '' };
 
 export default function Income() {
   const { state, dispatch } = useApp();
@@ -32,8 +34,9 @@ export default function Income() {
   function openEdit(item) { setForm({ ...item }); setEditId(item.id); setShowModal(true); }
 
   function handleSave() {
-    if (!form.amount || !form.source) return;
-    const payload = { ...form, amount: Number(form.amount) };
+    const finalSource = form.source === 'Other' ? form.customSource : form.source;
+    if (!form.amount || !finalSource) return;
+    const payload = { ...form, source: finalSource, amount: Number(form.amount) };
     if (editId) dispatch({ type: 'UPDATE_INCOME', payload: { ...payload, id: editId } });
     else dispatch({ type: 'ADD_INCOME', payload });
     setShowModal(false);
@@ -136,8 +139,17 @@ export default function Income() {
             </div>
             <div className="form-group">
               <label>Source</label>
-              <input type="text" className="form-control" placeholder="e.g., Monthly Salary" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} />
+              <select className="form-control" value={form.source} onChange={e => setForm({ ...form, source: e.target.value, customSource: '' })}>
+                <option value="">Select a source</option>
+                {INCOME_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
+            {form.source === 'Other' && (
+              <div className="form-group">
+                <label>Specify Source</label>
+                <input type="text" className="form-control" placeholder="Enter your income source" value={form.customSource} onChange={e => setForm({ ...form, customSource: e.target.value })} />
+              </div>
+            )}
             <div className="grid grid-2">
               <div className="form-group">
                 <label>Date</label>
