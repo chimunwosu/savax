@@ -40,11 +40,11 @@ export default function Advisor() {
     const actions = [];
     if (totalIncome === 0) actions.push({ text: 'Start by recording your income sources', icon: 'income' });
     if (savingsRate < 10 && totalIncome > 0) actions.push({ text: `Increase savings to at least 10% (currently ${savingsRate.toFixed(1)}%)`, icon: 'savings' });
-    if (totalInvested === 0 && totalIncome > 0) actions.push({ text: 'Begin investing to make your gold multiply', icon: 'invest' });
+    if (totalInvested === 0 && totalIncome > 0) actions.push({ text: 'Begin investing to make your money grow', icon: 'invest' });
     if (totalDebt > 0) actions.push({ text: `Focus on eliminating ${formatAmount(totalDebt)} in debt`, icon: 'debt' });
     if (goalsCount === 0) actions.push({ text: 'Set a savings goal to stay motivated', icon: 'goal' });
     if (!budgetOk && totalIncome > 0) actions.push({ text: 'Reduce expenses to stay within 70% of income', icon: 'budget' });
-    if (actions.length === 0) actions.push({ text: 'Keep up the excellent work! You follow the laws of Babylon well.', icon: 'success' });
+    if (actions.length === 0) actions.push({ text: 'Keep up the excellent work! You follow the 7 wealth principles perfectly.', icon: 'success' });
 
     // Law progress
     const lawData = SEVEN_LAWS.map((law, i) => {
@@ -69,7 +69,7 @@ export default function Advisor() {
     <div>
       <div className="page-header">
         <h1>Babylon Advisor</h1>
-        <p>Wisdom of the ages for thy journey</p>
+        <p>Timeless wisdom for your financial journey</p>
       </div>
 
       {/* Health Score + Daily Wisdom */}

@@ -57,7 +57,7 @@ export default function Settings() {
     <div>
       <div className="page-header">
         <h1>Settings</h1>
-        <p>Configure thy treasury</p>
+        <p>Configure your settings</p>
       </div>
 
       {/* Profile */}

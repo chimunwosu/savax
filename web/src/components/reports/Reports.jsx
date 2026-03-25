@@ -58,7 +58,7 @@ export default function Reports() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Financial Reports</h1>
-          <p>Review thy progress with wisdom</p>
+          <p>Review your financial progress</p>
         </div>
         <div className="flex gap-2">
           {[3, 6, 12].map(p => (

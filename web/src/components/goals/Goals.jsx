@@ -57,7 +57,7 @@ export default function Goals() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Savings Goals</h1>
-          <p>Set thy sights upon a worthy goal</p>
+          <p>Set your sights on a worthy goal</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> New Goal</button>
       </div>

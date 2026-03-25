@@ -53,7 +53,7 @@ export default function NetWorth() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Net Worth</h1>
-          <p>Know thy true wealth</p>
+          <p>Know your true wealth</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}><Plus size={16} /> Add Asset/Liability</button>
       </div>

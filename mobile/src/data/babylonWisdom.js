@@ -1,9 +1,9 @@
 export const SEVEN_LAWS = [
   {
     id: 1,
-    title: 'Start Thy Purse to Fattening',
+    title: 'Pay Yourself First',
     short: 'Save 10%',
-    description: 'For every ten coins thou placest within thy purse, take out for use but nine.',
+    description: 'For every ten coins you earn, keep at least one for yourself.',
     icon: 'PiggyBank',
     color: '#D4AF37',
     metric: 'savings_rate',
@@ -11,9 +11,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 2,
-    title: 'Control Thy Expenditures',
+    title: 'Control Your Spending',
     short: 'Budget Wisely',
-    description: 'Budget thy expenses that thou mayest have coins to pay for thy necessities and enjoyments.',
+    description: 'Plan your expenses so you always have enough for your needs and still enjoy life.',
     icon: 'Receipt',
     color: '#2d6a4f',
     metric: 'budget_adherence',
@@ -21,9 +21,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 3,
-    title: 'Make Thy Gold Multiply',
+    title: 'Make Your Money Grow',
     short: 'Invest',
-    description: 'Put each coin to laboring that it may reproduce its kind.',
+    description: 'Put your money to work so it earns more money for you.',
     icon: 'TrendingUp',
     color: '#457b9d',
     metric: 'investment_rate',
@@ -31,9 +31,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 4,
-    title: 'Guard Thy Treasures from Loss',
+    title: 'Protect Your Wealth from Loss',
     short: 'Protect',
-    description: 'Guard thy treasure from loss by investing only where thy principal is safe.',
+    description: 'Only invest where your money is safe. Avoid risky ventures you don\'t understand.',
     icon: 'Shield',
     color: '#e63946',
     metric: 'emergency_fund',
@@ -41,9 +41,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 5,
-    title: 'Make of Thy Dwelling a Profitable Investment',
+    title: 'Make Your Home a Worthy Investment',
     short: 'Own Assets',
-    description: 'Own thy own home and make it a profitable investment.',
+    description: 'Own your home and make it a source of wealth, not just an expense.',
     icon: 'Home',
     color: '#f4a261',
     metric: 'asset_value',
@@ -51,9 +51,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 6,
-    title: 'Ensure a Future Income',
+    title: 'Secure Your Future Income',
     short: 'Plan Ahead',
-    description: 'Provide in advance for the needs of thy growing age and the protection of thy family.',
+    description: 'Plan ahead for retirement and to protect your family\'s financial future.',
     icon: 'Landmark',
     color: '#6c5ce7',
     metric: 'retirement_progress',
@@ -61,9 +61,9 @@ export const SEVEN_LAWS = [
   },
   {
     id: 7,
-    title: 'Increase Thy Ability to Earn',
+    title: 'Increase Your Earning Power',
     short: 'Grow Skills',
-    description: 'Cultivate thy own powers, study and become wiser, become more skillful.',
+    description: 'Invest in yourself — learn more, build new skills, and become more valuable.',
     icon: 'GraduationCap',
     color: '#00b4d8',
     metric: 'skill_investment',
@@ -74,19 +74,19 @@ export const SEVEN_LAWS = [
 export const WISDOM_QUOTES = [
   "Wealth, like a tree, grows from a tiny seed.",
   "A part of all you earn is yours to keep.",
-  "Gold cometh gladly and in increasing quantity to any man who will put by not less than one-tenth of his earnings.",
-  "Advice is one thing that is freely given away, but watch that you take only what is worth having.",
-  "The hungrier one becomes, the clearer one's mind works.",
-  "Where the determination is, the way can be found.",
-  "Our acts can be no wiser than our thoughts.",
+  "Money flows generously toward anyone who saves at least one-tenth of their earnings.",
+  "Advice is freely given — just make sure you only take what's worth having.",
+  "The hungrier you become, the clearer your mind works.",
+  "Where there is determination, a way can always be found.",
+  "Your actions can only be as wise as your thoughts.",
   "Better a little caution than a great regret.",
-  "Wealth grows wherever men exert energy.",
-  "Opportunity is a haughty goddess who wastes no time with those who are unprepared.",
-  "Money is the medium by which earthly success is measured.",
-  "The soul of a free man looks at life as a series of problems to be solved and solves them.",
-  "Preceding accomplishment must be desire. Thy desires must be strong and definite.",
-  "Good luck can be enticed by accepting opportunity.",
-  "Men of action are favored by the goddess of good luck.",
+  "Wealth grows wherever people put in real effort.",
+  "Opportunity doesn't wait for those who aren't prepared.",
+  "Money is how we measure success in the real world.",
+  "A free person sees life as a series of problems to solve — and solves them.",
+  "Before any achievement comes desire. Your goals must be strong and clear.",
+  "Good luck comes to those who seize opportunity.",
+  "People of action are favored by good fortune.",
 ];
 
 export const EXPENSE_CATEGORIES = [
@@ -122,11 +122,11 @@ export function getRandomWisdom() {
 
 export function getContextualWisdom(data) {
   const { totalIncome, totalSavings, totalExpenses, totalInvestments } = data;
-  if (totalIncome === 0) return "The journey of wealth begins with a single coin. Start tracking your income today.";
+  if (totalIncome === 0) return "The journey to wealth begins with a single step. Start tracking your income today.";
   const savingsRate = totalIncome > 0 ? (totalSavings / totalIncome) * 100 : 0;
-  if (savingsRate < 10) return "Remember the first law: save at least one-tenth of all you earn. Your purse grows lean.";
-  if (savingsRate >= 10 && totalInvestments === 0) return "Well done saving! Now make thy gold multiply - consider investing your savings wisely.";
-  if (totalExpenses > totalIncome * 0.7) return "Control thy expenditures! Your spending exceeds 70% of your income.";
-  if (savingsRate >= 20) return "Excellent discipline! You save like the wealthiest merchants of Babylon.";
+  if (savingsRate < 10) return "Remember the first rule: save at least 10% of everything you earn. Your savings are running low.";
+  if (savingsRate >= 10 && totalInvestments === 0) return "Great job saving! Now put your money to work — consider investing your savings wisely.";
+  if (totalExpenses > totalIncome * 0.7) return "Watch your spending! Your expenses are over 70% of your income.";
+  if (savingsRate >= 20) return "Excellent discipline! You're saving like the wealthiest people in history.";
   return getRandomWisdom();
 }

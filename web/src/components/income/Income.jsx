@@ -46,7 +46,7 @@ export default function Income() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Income</h1>
-          <p>Track thy earnings and watch thy purse grow</p>
+          <p>Track your earnings and watch your savings grow</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Income</button>
       </div>

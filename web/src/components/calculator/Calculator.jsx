@@ -44,7 +44,7 @@ export default function Calculator() {
     <div>
       <div className="page-header">
         <h1>Compound Interest Calculator</h1>
-        <p>Watch thy gold multiply over time</p>
+        <p>Watch your money grow over time</p>
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 24 }}>

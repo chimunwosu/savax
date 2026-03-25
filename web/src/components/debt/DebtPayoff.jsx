@@ -69,7 +69,7 @@ export default function DebtPayoff() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Debt Payoff</h1>
-          <p>Guard thy treasures from loss</p>
+          <p>Protect your wealth from loss</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Debt</button>
       </div>

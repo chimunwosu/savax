@@ -56,7 +56,7 @@ export default function Investments() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Investments</h1>
-          <p>Make thy gold multiply</p>
+          <p>Make your money grow</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Investment</button>
       </div>
@@ -103,7 +103,7 @@ export default function Investments() {
         <div className="card card-gold" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 12 }}>The Third Law</h3>
           <p style={{ fontStyle: 'italic', color: 'var(--gray-600)', lineHeight: 1.7, fontSize: '0.95rem' }}>
-            "Put each coin to laboring that it may reproduce its kind. Make thy gold multiply."
+            "Put your money to work so it earns more money for you. Make your money grow."
           </p>
           <p className="text-sm text-gray mt-3">
             Invest wisely and let compound growth work in your favor. Diversify across asset classes to guard against loss.

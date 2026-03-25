@@ -48,7 +48,7 @@ export default function Expenses() {
       <div className="flex justify-between items-center" style={{ marginBottom: 24 }}>
         <div className="page-header" style={{ marginBottom: 0 }}>
           <h1>Expenses</h1>
-          <p>Control thy expenditures wisely</p>
+          <p>Control your spending wisely</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}><Plus size={16} /> Add Expense</button>
       </div>
